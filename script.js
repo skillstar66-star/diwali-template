@@ -57,9 +57,9 @@ function getSEOAttributes(product) {
     name = product.slug.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   }
   if (!name) name = "Rokea Premium Product";
-  
+
   name = name.replace(/"/g, '&quot;');
-  
+
   return `alt="${name}" title="${name}" aria-label="${name}" loading="lazy" decoding="async" width="800" height="1000"`;
 }
 
@@ -100,7 +100,7 @@ const isLocalhost = window.location.hostname === 'localhost' || window.location.
 
 function getProductLink(p) {
   if (isLocalhost) {
-    return p.slug ? `/product-details?slug=${p.slug}` : `/product-details?id=${p.id}`;
+    return p.slug ? `product-details.html?slug=${p.slug}` : `product-details.html?id=${p.id}`;
   } else {
     return p.slug ? `/product/${p.slug}` : `/product-details?id=${p.id}`;
   }
@@ -658,7 +658,7 @@ window.handleAuth = () => {
       renderAll();
     } else {
       sessionStorage.setItem('openAdmin', 'true');
-      window.location.href = '/';
+      window.location.href = 'index.html';
     }
     return;
   }
@@ -1229,12 +1229,12 @@ window.switchCategory = (cat) => {
 window.selectCategory = (cat) => {
   // Navigate to collections page
   localStorage.setItem('rokea_selected_category', cat);
-  window.location.href = `/collections`;
+  window.location.href = 'collections.html';
 }
 
 window.backToCategories = () => {
   // Navigate back to home page category section
-  window.location.href = '/#products';
+  window.location.href = 'index.html#products';
 }
 
 window.applySort = (sortType) => {
@@ -1460,7 +1460,7 @@ window.editProduct = (idx) => {
   document.getElementById('prodStock').value = p.stock || "In Stock";
   document.getElementById('prodDesc').value = p.description || "";
   if (document.getElementById('prodCare')) document.getElementById('prodCare').value = p.productCare || "";
-  
+
   if (document.getElementById('seoTitle')) document.getElementById('seoTitle').value = p.seoTitle || "";
   if (document.getElementById('seoKeyword')) document.getElementById('seoKeyword').value = p.seoKeyword || "";
   if (document.getElementById('seoDesc')) document.getElementById('seoDesc').value = p.seoDesc || "";
@@ -1506,11 +1506,11 @@ window.generateSeoFromDescription = () => {
   const shortDesc = cleanDesc.slice(0, 150) + (cleanDesc.length > 150 ? '...' : '');
   const lowerName = name.toLowerCase();
   const lowerCat = category.toLowerCase();
-  
+
   // Keyword Generation
   const words = lowerName.split(' ').filter(w => w.length > 3);
   const primaryKws = words.join(', ');
-  
+
   const focusKeyword = lowerName;
   const secondaryKeywords = `${lowerName} online, authentic ${lowerCat}, ${lowerCat} india`;
   const longTailKeywords = `buy ${lowerName} online best price, authentic ${lowerName} ${lowerCat}, ${lowerName} rokea by rk`;
@@ -1590,20 +1590,20 @@ window.generateSeoFromDescription = () => {
   if (document.getElementById('seoCanonical')) document.getElementById('seoCanonical').value = url;
   if (document.getElementById('seoRobots')) document.getElementById('seoRobots').value = "index, follow, max-image-preview:large";
   if (document.getElementById('seoImgAlt')) document.getElementById('seoImgAlt').value = `Premium ${name} - ROKEA by RK`;
-  
-  if (document.getElementById('seoOgTags')) document.getElementById('seoOgTags').value = 
-`<meta property="og:title" content="${name} | ROKEA by RK">
+
+  if (document.getElementById('seoOgTags')) document.getElementById('seoOgTags').value =
+    `<meta property="og:title" content="${name} | ROKEA by RK">
 <meta property="og:description" content="${shortDesc}">
 <meta property="og:image" content="${imgUrl}">
 <meta property="og:url" content="${url}">
 <meta property="og:type" content="product">`;
 
-  if (document.getElementById('seoTwitterTags')) document.getElementById('seoTwitterTags').value = 
-`<meta name="twitter:card" content="summary_large_image">
+  if (document.getElementById('seoTwitterTags')) document.getElementById('seoTwitterTags').value =
+    `<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="${name} | ROKEA by RK">
 <meta name="twitter:description" content="${shortDesc}">
 <meta name="twitter:image" content="${imgUrl}">`;
-  
+
   if (document.getElementById('seoProductSchema')) document.getElementById('seoProductSchema').value = JSON.stringify(productSchema, null, 2);
   if (document.getElementById('seoBreadcrumbSchema')) document.getElementById('seoBreadcrumbSchema').value = JSON.stringify(breadcrumbSchema, null, 2);
   if (document.getElementById('seoWebPageSchema')) document.getElementById('seoWebPageSchema').value = JSON.stringify(webPageSchema, null, 2);
@@ -1615,7 +1615,7 @@ window.generateSeoFromDescription = () => {
 
 window.bulkGenerateAllSeo = async () => {
   if (!confirm("This will loop through ALL products and generate advanced SEO locally. Are you sure?")) return;
-  
+
   const btn = document.getElementById('bulkGenerateSeoBtn');
   const originalText = btn.innerText;
   btn.disabled = true;
@@ -1624,8 +1624,8 @@ window.bulkGenerateAllSeo = async () => {
 
   for (let i = 0; i < products.length; i++) {
     const p = products[i];
-    btn.innerText = `Processing ${i+1} / ${products.length} (${p.name})`;
-    
+    btn.innerText = `Processing ${i + 1} / ${products.length} (${p.name})`;
+
     const name = p.name || 'Product';
     const category = p.category || 'Category';
     const price = p.price || '0';
@@ -1653,10 +1653,10 @@ window.bulkGenerateAllSeo = async () => {
     p.seoCanonical = url;
     p.seoRobots = "index, follow, max-image-preview:large";
     p.seoImgAlt = `Premium ${name} - ROKEA by RK`;
-    
+
     p.seoOgTags = `<meta property="og:title" content="${name} | ROKEA by RK">\n<meta property="og:description" content="${shortDesc}">\n<meta property="og:image" content="${imgUrl}">\n<meta property="og:url" content="${url}">\n<meta property="og:type" content="product">`;
     p.seoTwitterTags = `<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:title" content="${name} | ROKEA by RK">\n<meta name="twitter:description" content="${shortDesc}">\n<meta name="twitter:image" content="${imgUrl}">`;
-    
+
     p.seoProductSchema = JSON.stringify({
       "@context": "https://schema.org/",
       "@type": "Product",
@@ -1666,7 +1666,7 @@ window.bulkGenerateAllSeo = async () => {
       "image": imgUrl,
       "offers": { "@type": "Offer", "priceCurrency": "INR", "price": price, "availability": stock.toLowerCase().includes('out') ? "https://schema.org/OutOfStock" : "https://schema.org/InStock", "url": url }
     });
-    
+
     p.seoBreadcrumbSchema = JSON.stringify({
       "@context": "https://schema.org/",
       "@type": "BreadcrumbList",
@@ -1676,7 +1676,7 @@ window.bulkGenerateAllSeo = async () => {
         { "@type": "ListItem", "position": 3, "name": name, "item": url }
       ]
     });
-    
+
     p.seoWebPageSchema = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "WebPage",
@@ -1685,7 +1685,7 @@ window.bulkGenerateAllSeo = async () => {
       "url": url,
       "publisher": { "@type": "Organization", "name": "ROKEA by RK" }
     });
-    
+
     p.seoOrganizationSchema = JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Organization",
@@ -1693,7 +1693,7 @@ window.bulkGenerateAllSeo = async () => {
       "url": "https://rokeabyrk.com/",
       "logo": "https://rokeabyrk.com/images/logo.png"
     });
-    
+
     p.seoFaq = JSON.stringify([
       { "question": `What is the price of ${name}?`, "answer": `The current best price for ${name} is ₹${price} at ROKEA by RK.` },
       { "question": `Is ${name} available in stock?`, "answer": `Yes, ${name} is currently ${stock}. You can order it directly online.` },
@@ -1704,7 +1704,7 @@ window.bulkGenerateAllSeo = async () => {
       try {
         await db.collection("products").doc(p.id.toString()).set(p);
         generatedCount++;
-      } catch(e) {
+      } catch (e) {
         console.error("Bulk save failed for " + name, e);
       }
     }
@@ -1787,7 +1787,7 @@ window.openProductDetail = (productId) => {
   if (p) {
     window.location.href = getProductLink(p);
   } else {
-    window.location.href = `/product-details?id=${productId}`;
+    window.location.href = `product-details.html?id=${productId}`;
   }
 }
 
@@ -2647,7 +2647,7 @@ function _populateProductPage(p) {
 
   // Product Schema & Breadcrumbs JSON-LD
   let schemaScript = document.getElementById('productSchema');
-  
+
   // Remove ALL existing schema tags with Product to prevent duplicates
   // Populate Elements (similar to old openProductDetail logic but for static page)
   const mainImg = document.getElementById('detailMainImg');
@@ -2664,6 +2664,10 @@ function _populateProductPage(p) {
   const qtyPlus = document.getElementById('detailQtyPlus');
   const breadCat = document.getElementById('breadcrumb-cat');
   const breadName = document.getElementById('breadcrumb-name');
+  const shopBannerText = document.getElementById('shopBannerText');
+  if (shopBannerText) {
+      shopBannerText.innerHTML = `Shop this elegant <strong>${p.name || 'product'}</strong> from ROKEA BY RK in Coimbatore and discover timeless sarees curated for every special occasion.`;
+  }
 
   if (!name) return; // Not on product page
 
@@ -2710,12 +2714,63 @@ function _populateProductPage(p) {
 
   if (desc) {
     const descText = p.description || "Exquisite premium collection from ROKEA by RK.";
-    const descLines = descText.split('\n').filter(line => line.trim().length > 0);
-    desc.innerHTML = `<div style="display: flex; flex-direction: column; gap: 15px;">` + descLines.map(line => `
-      <div style="background: rgba(255,255,255,0.7); border-left: 3px solid var(--gold); padding: 15px 20px; border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.7; color: var(--text); box-shadow: 0 2px 10px rgba(0,0,0,0.02); transition: transform 0.3s; cursor: default;" onmouseover="this.style.transform='translateX(3px)';" onmouseout="this.style.transform='translateX(0)';">
-        ${line.replace(/^[✦•\-\*]\s*/, '').trim()}
+    const descLines = descText.split('\n').filter(line => line.trim().length > 0).map(l => l.replace(/^[✦•\-\*]\s*/, '').trim());
+    
+    // Filter out "Why You'll Love It" and styling tips if present in description text
+    const filteredLines = descLines.filter(line => {
+      const lower = line.toLowerCase();
+      return !lower.includes('why you') && 
+             !lower.includes('pair with gold jewellery') && 
+             !lower.includes('style as bridal wear');
+    });
+    
+    let prodDesc = filteredLines.length > 0 ? filteredLines.join('<br><br>') : descText;
+    
+    let color = p.color || "As shown";
+    let occasion = p.occasion || "Wedding, Festival & Traditional Wear";
+    let type = p.category || "Soft Silk Saree";
+
+    desc.innerHTML = `
+      <div class="info-box">
+          <div class="info-box-title">Product Description</div>
+          <div class="info-box-text">${prodDesc}</div>
       </div>
-    `).join('') + `</div>`;
+      <div class="info-box">
+          <div class="info-box-title">Product Details</div>
+          <div class="details-grid">
+              <div class="detail-item">
+                  <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path></svg></div>
+                  <div class="detail-label">Type</div>
+                  <div class="detail-value">: ${type}</div>
+              </div>
+              <div class="detail-item">
+                  <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path></svg></div>
+                  <div class="detail-label">Style</div>
+                  <div class="detail-value">: Traditional Indian</div>
+              </div>
+              <div class="detail-item">
+                  <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path></svg></div>
+                  <div class="detail-label">Colour</div>
+                  <div class="detail-value">: ${color}</div>
+              </div>
+              <div class="detail-item">
+                  <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+                  <div class="detail-label">Ideal For</div>
+                  <div class="detail-value">: Women</div>
+              </div>
+              <div class="detail-item">
+                  <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
+                  <div class="detail-label">Occasion</div>
+                  <div class="detail-value">: ${occasion}</div>
+              </div>
+              <div class="detail-item">
+                  <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div>
+                  <div class="detail-label">Care</div>
+                  <div class="detail-value">: Dry Wash Only</div>
+              </div>
+          </div>
+      </div>
+    `;
   }
 
   if (care) {
@@ -2820,7 +2875,7 @@ function _populateProductPage(p) {
       const thumbAlt = i === 0
         ? `${p.name} - Front View | ROKEA by RK`
         : `${p.name} - View ${i + 1} | ROKEA by RK`;
-      return `<img src="${img}" class="thumb-item ${i === 0 ? 'active' : ''}" loading="lazy" decoding="async" ${getSEOAttributes({name: thumbAlt})} onclick="switchDetailImage(${i})" onerror="this.style.display='none'">`;
+      return `<img src="${img}" class="thumb-item ${i === 0 ? 'active' : ''}" loading="lazy" decoding="async" ${getSEOAttributes({ name: thumbAlt })} onclick="switchDetailImage(${i})" onerror="this.style.display='none'">`;
     }).join('');
   }
 
@@ -3092,9 +3147,25 @@ function initTestimonialCarousel() {
 }
 
 document.addEventListener('DOMContentLoaded', initTestimonialCarousel);
-// Custom Blouse Booking Logic
+// Custom Blouse Booking Logic - Direct Google Form Open
 window.openBlouseBooking = () => {
-  window.location.href = '/custom-blouse-order';
+  window.open('https://forms.gle/xHJ6hSpyreHVNsNc8', '_blank');
+}
+
+// FAQ Accordion Toggle
+window.toggleFaq = (element) => {
+  const faqItem = element.closest('.faq-item');
+  if (!faqItem) return;
+  const wasActive = faqItem.classList.contains('active');
+  
+  // Close other open FAQ items for neat accordion behavior
+  document.querySelectorAll('.faq-item').forEach(item => {
+    item.classList.remove('active');
+  });
+
+  if (!wasActive) {
+    faqItem.classList.add('active');
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -3104,7 +3175,7 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       alert('Thank you! Your custom blouse order details have been received. We will contact you shortly on WhatsApp to confirm the order.');
       // Here you would typically send the data to your backend or Firebase
-      window.location.href = '/';
+      window.location.href = 'index.html';
     });
   }
 });
@@ -3159,10 +3230,10 @@ window.executeSlugMigration = async () => {
 };
 
 // Function to handle sharing products
-window.shareProduct = function(productId) {
+window.shareProduct = function (productId) {
   let urlToShare = window.location.href;
   let titleToShare = document.title;
-  
+
   // Try to find the exact product if it exists
   if (typeof products !== 'undefined' && products.length > 0) {
     let p = products.find(prod => prod.id == productId || prod.slug === productId);

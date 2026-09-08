@@ -57,6 +57,7 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  background: var(--dark);
 }
 
 body {
@@ -65,6 +66,8 @@ body {
   color: var(--text);
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  margin: 0;
+  padding: 0;
 }
 
 /* ── SPLASH SCREEN ── */
@@ -4949,6 +4952,136 @@ img {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(220, 39, 67, 0.5);
   color: white;
+}
+
+/* ================================================================
+   ROKEA by RK — FAQ SECTION STYLES
+   ================================================================ */
+.faq-section {
+  padding: 80px 20px;
+  background-color: var(--ivory, #F3EDE0);
+  position: relative;
+}
+
+.faq-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.faq-header {
+  text-align: center;
+  margin-bottom: 45px;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.faq-item {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid rgba(201, 168, 76, 0.25);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.faq-item.active {
+  border-color: var(--gold, #C9A84C);
+  box-shadow: 0 8px 25px rgba(201, 168, 76, 0.12);
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 26px;
+  cursor: pointer;
+  user-select: none;
+  background: transparent;
+  transition: background 0.3s ease;
+}
+
+.faq-question:hover {
+  background: rgba(201, 168, 76, 0.04);
+}
+
+.faq-question h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 17.5px;
+  font-weight: 600;
+  color: var(--dark, #1A1209);
+  margin: 0;
+  padding-right: 15px;
+  line-height: 1.4;
+  transition: color 0.3s ease;
+}
+
+.faq-item.active .faq-question h3 {
+  color: var(--gold-dark, #8B6914);
+}
+
+.faq-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(201, 168, 76, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  color: var(--gold-dark, #8B6914);
+}
+
+.faq-item.active .faq-icon {
+  background: var(--gold, #C9A84C);
+  color: #fff;
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s cubic-bezier(0.25, 1, 0.5, 1), padding 0.3s ease;
+  padding: 0 26px;
+}
+
+.faq-item.active .faq-answer {
+  max-height: 300px;
+  padding: 0 26px 22px;
+}
+
+.faq-answer p {
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--muted, #7A6A50);
+  margin: 0;
+}
+
+.faq-answer p strong {
+  color: var(--text, #3A2A10);
+}
+
+@media (max-width: 768px) {
+  .faq-section {
+    padding: 60px 16px;
+  }
+  .faq-question {
+    padding: 18px 18px;
+  }
+  .faq-question h3 {
+    font-size: 15.5px;
+  }
+  .faq-answer {
+    padding: 0 18px;
+  }
+  .faq-item.active .faq-answer {
+    padding: 0 18px 18px;
+  }
 }
 
 

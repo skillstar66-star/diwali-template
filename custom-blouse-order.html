@@ -28,9 +28,9 @@
   
   <link rel="preload" as="image" href="https://static.wixstatic.com/media/9881b8_16e714ef67304ad7812d38944b0b0b16~mv2.png/v1/crop/x_0,y_92,w_5000,h_1065/fill/w_1500,h_320,al_c,q_100,enc_avif,quality_auto/ROKEA%20horizontal%20logo%20(1).png" fetchpriority="high">
 
-  <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/mobile.css">
-  <link rel="stylesheet" href="/custom-blouse.css">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./mobile.css">
+  <link rel="stylesheet" href="./custom-blouse.css">
   <style>
     .ai-fab {
       display: none !important;
@@ -108,9 +108,9 @@
       <span></span>
     </div>
     <ul class="nav-links">
-      <li><a href="/">Home</a></li>
-      <li><a href="/about">About</a></li>
-      <li><a href="/collections">Products</a></li>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="collections.html">Products</a></li>
       <li><a href="#contact">Contact</a></li>
       <li id="userLinkCont"><a href="javascript:void(0)" onclick="openAuth()" id="navLogin">Login / Register</a></li>
     </ul>
@@ -138,248 +138,53 @@
   </nav>
   <section class="custom-blouse-page">
     <div class="cb-container">
-      <div class="cb-header">
+      <div class="cb-header" style="flex-wrap: wrap; gap: 20px;">
         <div class="cb-title-container">
           <img src="https://static.wixstatic.com/media/9881b8_16e714ef67304ad7812d38944b0b0b16~mv2.png/v1/crop/x_0,y_92,w_5000,h_1065/fill/w_155,h_33,fp_0.50_0.50,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/ROKEA%20horizontal%20logo%20(1).png" alt="Blouse" class="cb-blouse-icon" style="height: 40px;" loading="lazy" decoding="async" width="800" height="800">
           <div>
             <span class="cb-subtitle">Your Style, Your Blouse</span>
             <h1 class="cb-title">CUSTOM BLOUSE ORDER</h1>
-            <p class="cb-desc">Fill in the details below to place your custom blouse order</p>
+            <p class="cb-desc">Fill in the Google Form below to place your custom blouse stitching order</p>
           </div>
         </div>
-        <div class="cb-help-card">
-          <svg viewBox="0 0 24 24" fill="#25D366" width="24" height="24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path>
-          </svg>
-          <div class="cb-help-text">
-            <span>Need Help?</span>
-            <strong>WhatsApp us</strong>
-            <span>+91 70103 94051</span>
+        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+          <a href="https://forms.gle/xHJ6hSpyreHVNsNc8" target="_blank" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; font-size: 12px; text-decoration: none;">
+            <span>Open in New Tab</span>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+          </a>
+          <div class="cb-help-card">
+            <svg viewBox="0 0 24 24" fill="#25D366" width="24" height="24">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"></path>
+            </svg>
+            <div class="cb-help-text">
+              <span>Need Help?</span>
+              <strong>WhatsApp us</strong>
+              <span>+91 70103 94051</span>
+            </div>
           </div>
         </div>
       </div>
 
       <div class="cb-divider"><span class="cb-divider-icon">♦</span></div>
 
-      <form id="customBlouseForm" class="cb-form">
-        <!-- TOP SECTIONS: Customer & Delivery -->
-        <div class="cb-row">
-          <div class="cb-card cb-col-6">
-            <h3 class="cb-card-title"><span class="cb-icon">👤</span>CUSTOMER DETAILS</h3>
-            <div class="cb-field">
-              <label>Full Name <span class="req">*</span></label>
-              <input type="text" id="cb_name" placeholder="Enter your full name" required="">
-            </div>
-            <div class="cb-field">
-              <label>Mobile Number <span class="req">*</span></label>
-              <input type="tel" id="cb_mobile" placeholder="Enter your mobile number" required="">
-            </div>
-            <div class="cb-field">
-              <label>Email Address (Optional)</label>
-              <input type="email" id="cb_email" placeholder="Enter your email address">
-            </div>
-          </div>
-
-          <div class="cb-card cb-col-6">
-            <h3 class="cb-card-title"><span class="cb-icon">📍</span>DELIVERY DETAILS</h3>
-            <div class="cb-field">
-              <label>Address <span class="req">*</span></label>
-              <textarea id="cb_address" placeholder="House / Flat / Building, Street, Area" rows="3" required=""></textarea>
-            </div>
-            <div class="cb-row" style="margin-top: 15px;">
-              <div class="cb-field cb-col-6" style="margin-bottom:0">
-                <label>City <span class="req">*</span></label>
-                <input type="text" id="cb_city" placeholder="Enter your city" required="">
-              </div>
-              <div class="cb-field cb-col-6" style="margin-bottom:0">
-                <label>Pincode <span class="req">*</span></label>
-                <input type="text" id="cb_pincode" placeholder="Enter pincode" required="">
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- BLOUSE DETAILS -->
-        <div class="cb-card cb-full-width">
-          <h3 class="cb-card-title"><span class="cb-icon">👚</span>BLOUSE DETAILS</h3>
-          <div class="cb-row cb-wrap">
-            <div class="cb-field cb-col-3">
-              <label>Blouse Type <span class="req">*</span></label>
-              <select id="cb_blouse_type" required="">
-                <option value="" disabled="" selected="">Select type</option>
-                <option value="Regular">Regular</option>
-                <option value="Princess Cut">Princess Cut</option>
-                <option value="Katori">Katori</option>
-              </select>
-            </div>
-            <div class="cb-field cb-col-3">
-              <label>Sleeve Type <span class="req">*</span></label>
-              <input type="file" id="cb_sleeve_type_upload" accept="image/*" required="" style="font-size: 11px; width: 100%; padding: 5px;">
-            </div>
-            <div class="cb-field cb-col-3">
-              <label>Front Neck Design <span class="req">*</span></label>
-              <input type="file" id="cb_front_neck_upload" accept="image/*" required="" style="font-size: 11px; width: 100%; padding: 5px;">
-            </div>
-            <div class="cb-field cb-col-3">
-              <label>Back Neck Design <span class="req">*</span></label>
-              <input type="file" id="cb_back_neck_upload" accept="image/*" required="" style="font-size: 11px; width: 100%; padding: 5px;">
-            </div>
-            <div class="cb-field cb-col-3">
-              <label>Opening Type <span class="req">*</span></label>
-              <select id="cb_opening_type" required="">
-                <option value="" disabled="" selected="">Select opening type</option>
-                <option value="Front Open">Front Open</option>
-                <option value="Back Open">Back Open</option>
-              </select>
-            </div>
-            <div class="cb-field cb-col-3 cb-radio-group">
-              <label>Padding / Cup <span class="req">*</span></label>
-              <div class="cb-radios">
-                <label><input type="radio" name="cb_padding" value="Yes" required="" aria-label="Input field"> Yes</label>
-                <label><input type="radio" name="cb_padding" value="No" aria-label="Input field"> No</label>
-              </div>
-            </div>
-            <div class="cb-field cb-col-3 cb-radio-group">
-              <label>Lining <span class="req">*</span></label>
-              <div class="cb-radios">
-                <label><input type="radio" name="cb_lining" value="Yes" required="" aria-label="Input field"> Yes</label>
-                <label><input type="radio" name="cb_lining" value="No" aria-label="Input field"> No</label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- MEASUREMENTS -->
-        <div class="cb-card cb-full-width">
-          <div class="cb-card-header-flex">
-            <h3 class="cb-card-title"><span class="cb-icon">📏</span>MEASUREMENTS (In Inches)</h3>
-
-          </div>
-          <div class="cb-row">
-            <div class="cb-measure-grid">
-              <div class="cb-field"><label>Blouse Length <span class="req">*</span></label><input type="number" step="0.5" id="cb_m_blouse_len" placeholder="inches" required=""></div>
-              <div class="cb-field"><label>Chest / Bust <span class="req">*</span></label><input type="number" step="0.5" id="cb_m_bust" placeholder="inches" required=""></div>
-              <div class="cb-field"><label>Waist <span class="req">*</span></label><input type="number" step="0.5" id="cb_m_waist" placeholder="inches" required=""></div>
-              <div class="cb-field"><label>Shoulder <span class="req">*</span></label><input type="number" step="0.5" id="cb_m_shoulder" placeholder="inches" required=""></div>
-              <div class="cb-field"><label>Sleeve Length <span class="req">*</span></label><input type="number" step="0.5" id="cb_m_sleeve_len" placeholder="inches" required=""></div>
-              <div class="cb-field"><label>Sleeve Width <span class="req">*</span></label><input type="number" step="0.5" id="cb_m_sleeve_width" placeholder="inches" required=""></div>
-              <div class="cb-field"><label>Front Neck <span class="req">*</span></label><input type="number" step="0.5" id="cb_m_fnd" placeholder="inches" required=""></div>
-              <div class="cb-field"><label>Back Neck <span class="req">*</span></label><input type="number" step="0.5" id="cb_m_bnd" placeholder="inches" required=""></div>
-            </div>
-
-          </div>
-        </div>
-
-        <!-- DESIGN & REFERENCE -->
-        <div class="cb-card cb-full-width">
-          <h3 class="cb-card-title"><span class="cb-icon">🖼️</span>DESIGN &amp; REFERENCE</h3>
-          <div class="cb-row cb-wrap">
-            <div class="cb-col-4">
-              <label class="cb-upload-label">Saree Photo (Optional)<br><small>Upload a photo of your
-                  saree</small></label>
-              <div class="cb-upload-area">
-                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--primary)" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"></path>
-                </svg>
-                <p><strong>Click to upload</strong> or drag and drop<br><small>PNG, JPG, JPEG (Max. 5MB)</small></p>
-                <input type="file" accept="image/*" id="cb_saree_img">
-              </div>
-            </div>
-            <div class="cb-col-4">
-              <label class="cb-upload-label">Blouse Design Photo (Optional)<br><small>Upload a design you
-                  like</small></label>
-              <div class="cb-upload-area">
-                <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--primary)" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"></path>
-                </svg>
-                <p><strong>Click to upload</strong> or drag and drop<br><small>PNG, JPG, JPEG (Max. 5MB)</small></p>
-                <input type="file" accept="image/*" id="cb_design_img">
-              </div>
-            </div>
-            <div class="cb-col-4">
-              <div class="cb-field">
-                <label>Additional Notes / Special Instructions</label>
-                <textarea id="cb_notes" placeholder="Mention your custom requirements, color preferences, embroidery, lace, etc." style="height: 110px;"></textarea>
-                <small class="cb-sub-label">(Optional)</small>
-              </div>
-            </div>
-          </div>
-          <div class="cb-help-banner" style="margin-top: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; color: #5b21b6; font-weight: 500; font-size: 13px; background: #f3e8ff; padding: 12px; border-radius: 8px; text-align: center;">
-            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
-              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"></path>
-            </svg>
-            Confused with the options? Need help? Give us a call at <strong>+91 70103 94051</strong>
-          </div>
-        </div>
-
-        <!-- ORDER & PAYMENT -->
-        <div class="cb-row">
-          <div class="cb-card cb-col-6">
-            <h3 class="cb-card-title"><span class="cb-icon">📅</span>ORDER DETAILS</h3>
-            <div class="cb-row">
-              <div class="cb-field cb-col-6">
-                <label>Quantity <span class="req">*</span></label>
-                <select id="cb_qty" required="">
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                </select>
-              </div>
-              <div class="cb-field cb-col-6">
-                <label>Required Delivery Date <span class="req">*</span></label>
-                <input type="date" id="cb_delivery_date" required="">
-              </div>
-            </div>
-          </div>
-
-          <div class="cb-card cb-col-6">
-            <h3 class="cb-card-title"><span class="cb-icon">💳</span>PAYMENT DETAILS</h3>
-            <div class="cb-row">
-              <div class="cb-field cb-col-6">
-                <label>Payment Method <span class="req">*</span></label>
-                <select id="cb_payment" required="" onchange="const isOnline = this.value.includes('Online') || this.value.includes('Transfer') || this.value.includes('GPay') || this.value.includes('UPI'); document.getElementById('cb_payment_screenshot_wrapper').style.display = isOnline ? 'block' : 'none'; document.getElementById('cb_payment_screenshot').required = isOnline;">
-                  <option value="" disabled="" selected="">Select payment method</option>
-                  <option value="Online Payment (GPay/UPI)">Online Payment (GPay/UPI)</option>
-                  <option value="Bank Transfer">Bank Transfer</option>
-                </select>
-              </div>
-              <div class="cb-field cb-col-6">
-                <label>Advance Amount (₹) <span class="req">*</span></label>
-                <input type="number" id="cb_advance" placeholder="Enter advance amount" required="">
-              </div>
-            </div>
-            <div class="cb-field cb-full-width" id="cb_payment_screenshot_wrapper" style="display: none; margin-top: 10px;">
-              <label>Payment Screenshot <span class="req">*</span></label>
-              <input type="file" id="cb_payment_screenshot" accept="image/*" style="padding: 5px;">
-              <small class="cb-sub-label">Please upload a screenshot of your successful transaction.</small>
-            </div>
-            <div class="cb-notice">
-              <strong>Note:</strong> Remaining amount can be paid before dispatch / on delivery as per the selected
-              payment method.
-            </div>
-          </div>
-        </div>
-
-        <!-- SUBMIT -->
-        <div class="cb-submit-area">
-          <label class="cb-checkbox-label">
-            <input type="checkbox" id="cb_agree" required="">
-            I agree to the <a href="#">Terms &amp; Conditions</a> and confirm that all measurements provided are correct.
-          </label>
-          <button type="submit" class="cb-submit-btn">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
-              <path d="M3 6h18M16 10a4 4 0 0 1-8 0"></path>
-            </svg>
-            SUBMIT ORDER
-          </button>
-          <p class="cb-secure"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor">
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0110 0v4"></path>
-            </svg> Your details are safe and secure with us.</p>
-        </div>
-
-      </form>
+      <!-- GOOGLE FORM EMBED CONTAINER -->
+      <div class="google-form-container" style="width: 100%; margin: 20px 0; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid rgba(201, 168, 76, 0.2);">
+        <iframe id="googleBlouseFormIframe"
+          src="https://forms.gle/xHJ6hSpyreHVNsNc8"
+          width="100%"
+          height="1100"
+          frameborder="0"
+          marginheight="0"
+          marginwidth="0"
+          style="width: 100%; min-height: 900px; border: none; display: block;"
+          loading="lazy">
+          Loading Google Form…
+        </iframe>
+      </div>
     </div>
   </section>
   <!-- FOOTER -->
@@ -418,8 +223,8 @@
         <div class="footer-col-title">Quick Links</div>
         <ul class="footer-links">
           <li><a href="#home">Home</a></li>
-          <li><a href="/about">Our Heritage</a></li>
-          <li><a href="/ai-stylist">AI Virtual Stylist</a></li>
+          <li><a href="about.html">Our Heritage</a></li>
+          <li><a href="ai-stylist.html">AI Virtual Stylist</a></li>
           <li><a href="#instagram-hub">Social Hub</a></li>
         </ul>
       </div>
@@ -427,9 +232,9 @@
         <div class="footer-col-title">Visit Us</div>
         <address style="font-style: normal; color: var(--muted); font-size: 14px; line-height: 1.8; margin-bottom: 15px;">
           ROKEA by RK<br>
-          Sanganoor road, Rathinapuri post,<br>
-          Coimbatore, Tamil Nadu - 641027<br>
-          India<br>
+          11/4, Bharathi Park 4th Cross Rd,<br>
+          Jawahar Nagar, Saibaba Colony,<br>
+          Coimbatore - 641011<br>
           Phone: <a href="tel:+917010394051" style="color: var(--muted); text-decoration: none;">+91 70103 94051</a>
         </address>
         <button class="btn-primary" style="padding: 8px 15px; font-size: 12px;" onclick="openAuth()">Book
@@ -788,9 +593,9 @@
       <span class="menu-close" onclick="toggleMobileMenu()">×</span>
     </div>
     <ul class="mobile-nav-links">
-      <li><a href="/" onclick="toggleMobileMenu()">Home</a></li>
-      <li><a href="/about" onclick="toggleMobileMenu()">About</a></li>
-      <li><a href="/collections" onclick="toggleMobileMenu()">Products</a></li>
+      <li><a href="index.html" onclick="toggleMobileMenu()">Home</a></li>
+      <li><a href="about.html" onclick="toggleMobileMenu()">About</a></li>
+      <li><a href="collections.html" onclick="toggleMobileMenu()">Products</a></li>
       <li><a href="#contact" onclick="toggleMobileMenu()">Contact</a></li>
       <li id="mobileLoginCont"><a href="javascript:void(0)" onclick="toggleMobileMenu(); openAuth()">Login /
           Register</a></li>
@@ -849,8 +654,8 @@
     </div>
   </div>
 
-  <script src="/config.js" defer=""></script>
-  <script src="/script.js" defer=""></script>
+  <script src="./config.js" defer=""></script>
+  <script src="./script.js" defer=""></script>
 
 
   <!-- WHATSAPP FLOATING BUTTON -->

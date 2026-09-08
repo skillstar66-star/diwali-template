@@ -6,8 +6,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&amp;family=Poppins:wght@300;400;500;600;700&amp;family=Great+Vibes&amp;display=swap" rel="stylesheet">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-  <link rel="stylesheet" href="/style.css">
-  <link rel="stylesheet" href="/mobile.css">
+  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./mobile.css">
   <!-- Razorpay SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js" defer=""></script>
   <!-- Firebase SDK -->
@@ -67,7 +67,7 @@
 
   <!-- NAV -->
   <nav>
-    <a href="/" class="nav-logo" aria-label="ROKEA by RK Homepage">
+    <a href="index.html" class="nav-logo" aria-label="ROKEA by RK Homepage">
       <img id="navLogoImg" src="https://static.wixstatic.com/media/9881b8_16e714ef67304ad7812d38944b0b0b16~mv2.png/v1/crop/x_0,y_92,w_5000,h_1065/fill/w_155,h_33,fp_0.50_0.50,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/ROKEA%20horizontal%20logo%20(1).png" alt="ROKEA by RK" class="logo-img" loading="eager" fetchpriority="high" decoding="async" width="800" height="800">
     </a>
     <div class="menu-toggle" aria-label="Toggle mobile menu" role="button" tabindex="0" onclick="toggleMobileMenu()">
@@ -76,9 +76,10 @@
       <span></span>
     </div>
     <ul class="nav-links">
-      <li><a href="/">Home</a></li>
-      <li><a href="/about">About</a></li>
-      <li><a href="/collections">Products</a></li>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="collections.html">Products</a></li>
+      <li><a href="index.html#custom-blouse">Custom Blouse</a></li>
       <li><a href="#contact">Contact</a></li>
       <li id="userLinkCont"><a href="javascript:void(0)" onclick="openAuth()" id="navLogin">Login / Register</a></li>
     </ul>
@@ -367,7 +368,7 @@
     <div style="max-width:1100px;margin:0 auto;padding:0 24px;">
 
       <!-- Back link -->
-      <a href="/" style="display:inline-flex;align-items:center;gap:8px;color:var(--gold-dark);font-size:0.82rem;letter-spacing:0.06em;text-decoration:none;font-family:'Poppins',sans-serif;text-transform:uppercase;margin-bottom:48px;">
+      <a href="index.html" style="display:inline-flex;align-items:center;gap:8px;color:var(--gold-dark);font-size:0.82rem;letter-spacing:0.06em;text-decoration:none;font-family:'Poppins',sans-serif;text-transform:uppercase;margin-bottom:48px;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px;"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
         Back to Home
       </a>
@@ -547,7 +548,7 @@
         No more uncertainty. No more second-guessing. Just effortless, confident style — rooted in tradition, guided by technology.
       </p>
 
-      <a href="/ai-stylist" class="btn-primary" style="display:inline-block;text-decoration:none;padding:15px 44px;font-size:0.9rem;letter-spacing:0.08em;">Try the AI Stylist →</a>
+      <a href="ai-stylist.html" class="btn-primary" style="display:inline-block;text-decoration:none;padding:15px 44px;font-size:0.9rem;letter-spacing:0.08em;">Try the AI Stylist →</a>
     </div>
   </section>
 
@@ -561,7 +562,7 @@
         Whether you're a <strong style="font-weight:500;color:var(--gold);">bride</strong> searching for your dream bridal set, a <strong style="font-weight:500;color:var(--gold);">working woman</strong> curating her festive wardrobe, or someone discovering the joy of Indian adornment for the first time — Rokea is designed to serve you. From our handpicked collection to our AI-powered styling experience, every touchpoint is crafted with care, so you always feel <em style="color:var(--gold);">seen, celebrated, and beautifully dressed.</em>
       </p>
       <div style="margin-top:44px;">
-        <a href="/collections" class="btn-primary" style="display:inline-block;text-decoration:none;padding:15px 44px;font-size:0.9rem;letter-spacing:0.08em;">Explore the Collection →</a>
+        <a href="collections.html" class="btn-primary" style="display:inline-block;text-decoration:none;padding:15px 44px;font-size:0.9rem;letter-spacing:0.08em;">Explore the Collection →</a>
       </div>
     </div>
       </div>
@@ -589,7 +590,7 @@
   <footer id="contact">
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="/" class="nav-logo" aria-label="ROKEA by RK Homepage">
+        <a href="index.html" class="nav-logo" aria-label="ROKEA by RK Homepage">
           <img src="https://static.wixstatic.com/media/9881b8_16e714ef67304ad7812d38944b0b0b16~mv2.png/v1/crop/x_0,y_92,w_5000,h_1065/fill/w_155,h_33,fp_0.50_0.50,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/ROKEA%20horizontal%20logo%20(1).png" alt="ROKEA by RK" class="logo-img" loading="lazy" decoding="async" width="800" height="800">
         </a>
         <p class="footer-tagline">Coimbatore's finest destination for luxury handwoven sarees and heritage jewellery,
@@ -619,16 +620,16 @@
       <div>
         <div class="footer-col-title">Quick Links</div>
         <ul class="footer-links">
-          <li><a href="/#home">Home</a></li>
-          <li><a href="/about">Our Heritage</a></li>
-          <li><a href="/ai-stylist">AI Virtual Stylist</a></li>
-          <li><a href="/#instagram-hub">Social Hub</a></li>
+          <li><a href="index.html#home">Home</a></li>
+          <li><a href="about.html">Our Heritage</a></li>
+          <li><a href="ai-stylist.html">AI Virtual Stylist</a></li>
+          <li><a href="index.html#instagram-hub">Social Hub</a></li>
         </ul>
       </div>
       <div>
         <div class="footer-col-title">Visit Us</div>
         <ul class="footer-links">
-          <li><a href="https://maps.google.com/?q=Sanganoor+road,+Rathinapuri+post,+Coimbatore-641027" target="_blank">Sanganoor road, Rathinapuri post, Coimbatore-641027</a></li>
+          <li><a href="https://maps.google.com/?q=11/4,+Bharathi+Park+4th+Cross+Rd,+Jawahar+Nagar,+Saibaba+Colony,+Coimbatore+-+641011" target="_blank">11/4, Bharathi Park 4th Cross Rd, Jawahar Nagar, Saibaba Colony, Coimbatore - 641011</a></li>
           <li><a href="tel:+917010394051">+91 7010394051</a></li>
           <li><a href="mailto:rokeabyrk@gmail.com">rokeabyrk@gmail.com</a></li>
           <li style="margin-top: 15px;"><button class="btn-primary" style="padding: 8px 15px; font-size: 12px;" onclick="openAuth()">Book Appointment</button></li>
@@ -717,24 +718,24 @@
   <!-- MOBILE MENU -->
   <div id="mobileMenu" class="mobile-menu">
     <div class="mobile-menu-header">
-      <a href="/" class="nav-logo" aria-label="ROKEA by RK Homepage">
+      <a href="index.html" class="nav-logo" aria-label="ROKEA by RK Homepage">
         <img src="https://static.wixstatic.com/media/9881b8_16e714ef67304ad7812d38944b0b0b16~mv2.png/v1/crop/x_0,y_92,w_5000,h_1065/fill/w_155,h_33,fp_0.50_0.50,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/ROKEA%20horizontal%20logo%20(1).png" alt="ROKEA by RK" class="logo-img" loading="lazy" decoding="async" width="800" height="800">
       </a>
       <span class="menu-close" onclick="toggleMobileMenu()">×</span>
     </div>
     <ul class="mobile-nav-links">
-      <li><a href="/" onclick="toggleMobileMenu()">Home</a></li>
-      <li><a href="/about" onclick="toggleMobileMenu()">About</a></li>
-      <li><a href="/collections" onclick="toggleMobileMenu()">Products</a></li>
+      <li><a href="index.html" onclick="toggleMobileMenu()">Home</a></li>
+      <li><a href="about.html" onclick="toggleMobileMenu()">About</a></li>
+      <li><a href="collections.html" onclick="toggleMobileMenu()">Products</a></li>
       <li><a href="#contact" onclick="toggleMobileMenu()">Contact</a></li>
     </ul>
   </div>
 
-  <script src="/config.js" defer=""></script>
-  <script src="/script.js" defer=""></script>
+  <script src="./config.js" defer=""></script>
+  <script src="./script.js" defer=""></script>
 
   <!-- AI VIRTUAL STYLIST FLOATING BUTTON -->
-  <a href="/ai-stylist" class="ai-fab">
+  <a href="ai-stylist.html" class="ai-fab">
     <div class="ai-fab-icon">
       ✦
       <span class="ai-fab-badge">New</span>
