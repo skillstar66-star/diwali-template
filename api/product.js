@@ -74,6 +74,11 @@ module.exports = async function handler(req, res) {
     return res.redirect(302, '/collections');
   }
 
+  // Reject static files / extension requests misrouted to /api/product
+  if (slug.includes('.')) {
+    return res.status(404).send('Not found');
+  }
+
   const p = await getProductBySlugOrId(slug);
   
   // Load raw HTML
@@ -84,6 +89,14 @@ module.exports = async function handler(req, res) {
   } catch (err) {
     return res.status(500).send('HTML template not found.');
   }
+
+  if (!html.includes('<base href="/">')) {
+    html = html.replace('<head>', '<head>\n    <base href="/">');
+  }
+  html = html.replace(/href="\.\/style\.css"/g, 'href="/style.css"');
+  html = html.replace(/href="\.\/mobile\.css"/g, 'href="/mobile.css"');
+  html = html.replace(/src="\.\/config\.js"/g, 'src="/config.js"');
+  html = html.replace(/src="\.\/script\.js"/g, 'src="/script.js"');
 
   if (!p) {
     // Product not found, fallback to serving default HTML (or redirect)
@@ -218,6 +231,22 @@ module.exports = async function handler(req, res) {
   // 7. Inject SSR global variable for client-side script to skip Firestore fetch
   const ssrState = `<script>window.__INITIAL_PRODUCT_DATA__ = ${JSON.stringify(p)};</script>`;
   html = html.replace('</head>', `${ssrState}\n</head>`);
+
+  // 8. Pre-render visible product fields into the HTML for instant SSR display
+  html = html.replace(/<h1 class="product-title-big" id="detailName">.*?<\/h1>/, `<h1 class="product-title-big" id="detailName" style="display:block;">${productName}</h1>`);
+  html = html.replace(/<div class="product-price-big" id="detailPrice">.*?<\/div>/, `<div class="product-price-big" id="detailPrice">₹${cleanPrice.toLocaleString('en-IN')}</div>`);
+  html = html.replace(/<span id="breadcrumb-name">.*?<\/span>/, `<span id="breadcrumb-name">${productName}</span>`);
+  if (p.category) {
+    html = html.replace(/<a href="collections\.html" id="breadcrumb-cat">.*?<\/a>/, `<a href="/collections" id="breadcrumb-cat">${p.category}</a>`);
+  }
+  if (productImg) {
+    html = html.replace(/<div class="img-skeleton" id="imgSkeleton">/g, '<div class="img-skeleton hide" id="imgSkeleton" style="display:none;">');
+    html = html.replace(/id="detailMainImg"/, `id="detailMainImg" src="${productImg}" class="img-loaded"`);
+  }
+  if (p.description) {
+    const formattedDesc = p.description.split('\n').filter(l => l.trim()).map(l => l.replace(/^[✦•\-\*]\s*/, '').trim()).join('<br><br>');
+    html = html.replace(/<div id="descBody">[\s\S]*?<\/div>/, `<div id="descBody"><div class="info-box"><div class="info-box-title">Product Description</div><div class="info-box-text">${formattedDesc}</div></div></div>`);
+  }
 
   res.setHeader('Content-Type', 'text/html');
   res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate'); // Cache at Edge

@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <base href="/">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Details — ROKEA by RK</title>
@@ -38,8 +39,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="./style.css">
-    <link rel="stylesheet" href="./mobile.css">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/mobile.css">
     <!-- Razorpay SDK -->
     <script src="https://checkout.razorpay.com/v1/checkout.js" defer=""></script>
     <!-- Firebase SDK -->
@@ -203,8 +204,13 @@
         }
 
         .product-title-big {
-            display: none;
-            /* In the reference design, price is at the top */
+            display: block;
+            font-size: 26px;
+            font-family: 'Playfair Display', serif;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-weight: 600;
+            line-height: 1.3;
         }
 
         .product-price-big {
@@ -843,7 +849,7 @@
     <div class="modal" id="authModal">
         <div class="modal-content">
             <video class="auth-bg-video" autoplay loop muted playsinline>
-                <source src="form.mp4" type="video/mp4">
+                <source src="/form.mp4" type="video/mp4">
             </video>
             <div class="auth-video-overlay"></div>
             <span class="modal-close" onclick="closeAuth()">×</span>
@@ -1071,8 +1077,8 @@
         </div>
     </div>
 
-    <script src="./config.js" defer=""></script>
-    <script src="./script.js" defer=""></script>
+    <script src="/config.js" defer=""></script>
+    <script src="/script.js" defer=""></script>
 
 
 

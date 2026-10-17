@@ -2564,31 +2564,14 @@ if (urlCat) {
 // Handle Product ID from URL
 // Wait for Firestore to load before initialising the product page
 if (urlId) {
-  // Save product ID to sessionStorage so refresh still works
   sessionStorage.setItem('rokea_current_product_id', urlId);
-
-  // Show a skeleton loader so the user doesn't see a broken image
-  const mainImg = document.getElementById('detailMainImg');
-  if (mainImg) {
-    mainImg.style.background = 'linear-gradient(90deg, #f0e6d3 25%, #faf6ef 50%, #f0e6d3 75%)';
-    mainImg.style.backgroundSize = '200% 100%';
-    mainImg.style.animation = 'shimmer 1.5s infinite';
-    // Inject shimmer keyframe once
-    if (!document.getElementById('shimmerStyle')) {
-      const s = document.createElement('style');
-      s.id = 'shimmerStyle';
-      s.textContent = '@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }';
-      document.head.appendChild(s);
-    }
-  }
-
-  if (products.length > 0) {
-    // Products already in memory from localStorage — init immediately
+  if (window.__INITIAL_PRODUCT_DATA__) {
+    initProductPage(urlId);
+  } else if (products.length > 0) {
+    setTimeout(() => { initProductPage(urlId); }, 50);
+  } else {
     setTimeout(() => { initProductPage(urlId); }, 100);
   }
-  // initProductPage is also called by renderAll() once Firestore snapshot arrives,
-  // so first-time visitors (empty localStorage) are handled automatically.
-
 } else {
   // No ?id= in URL — check sessionStorage (happens after refresh when URL is clean)
   const savedId = sessionStorage.getItem('rokea_current_product_id');
@@ -2604,7 +2587,7 @@ if (urlId) {
 
 function initProductPage(productId) {
   // If Server-Side Rendering provided the initial data, use it immediately!
-  if (window.__INITIAL_PRODUCT_DATA__ && (window.__INITIAL_PRODUCT_DATA__.id === productId || window.__INITIAL_PRODUCT_DATA__.slug === productId)) {
+  if (window.__INITIAL_PRODUCT_DATA__) {
     let fetched = window.__INITIAL_PRODUCT_DATA__;
     if (!products.find(x => x.id == fetched.id)) products.push(fetched);
     return _populateProductPage(fetched);
