@@ -61,6 +61,7 @@
   <link rel="apple-touch-icon" sizes="180x180" href="https://rokeabyrk.com/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-title" content="ROKEA">
   <link rel="manifest" href="https://rokeabyrk.com/site.webmanifest">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body class="about-page">
@@ -422,7 +423,7 @@
   </section>
 
   <!-- ═══ WHAT ROKEA OFFERS ═══ -->
-  <section id="about" style="background:var(--cream);padding:60px 24px 100px;border-top:1px solid rgba(201,168,76,0.1);">
+  <section id="about" style="background-image: url('image copy 9.png'); background-size: cover; background-position: center; background-repeat: no-repeat; padding:60px 24px 100px; border-top:1px solid rgba(201,168,76,0.1);">
     <div style="max-width:980px;margin:0 auto;">
 
       <!-- Section heading -->
@@ -479,7 +480,7 @@
   </section>
 
   <!-- ═══ THE ROKEA DIFFERENCE ═══ -->
-  <section style="background:var(--ivory);padding:90px 24px;border-top:1px solid rgba(201,168,76,0.1);">
+  <section style="background-image: url('image copy 10.png'); background-size: cover; background-position: center center; background-repeat: no-repeat; padding:90px 24px; border-top:1px solid rgba(201,168,76,0.1);">
     <div style="max-width:980px;margin:0 auto;text-align:center;">
       <span class="section-label" style="display:block;margin-bottom:10px;">Our Promise</span>
       <h2 class="section-title" style="margin-bottom:12px;">The Rokea <em style="font-family:'Great Vibes',cursive;font-size:1.4em;font-weight:400;font-style:normal;color:var(--gold);padding:0 6px;">Difference</em></h2>
@@ -644,32 +645,110 @@
 
   <!-- AUTH MODAL -->
   <div class="modal" id="authModal">
-    <div class="modal-content" style="max-width: 400px;">
+    <div class="modal-content">
+      <video class="auth-bg-video" autoplay loop muted playsinline>
+        <source src="form.mp4" type="video/mp4">
+      </video>
+      <div class="auth-video-overlay"></div>
       <span class="modal-close" onclick="closeAuth()">×</span>
-      <div id="loginView">
-        <span class="section-label">Welcome Back</span>
-        <h3 style="margin-bottom: 20px; font-family: 'Playfair Display', serif; font-size: 28px;">Sign In</h3>
-        <div class="form-group"><label>Email</label><input type="email" id="loginEmail" placeholder="your@email.com">
+
+      <div class="auth-form-card">
+        <!-- Login Form -->
+        <div id="loginView">
+          <div class="auth-top-ornament">🪷</div>
+          <span class="section-label">WELCOME BACK</span>
+          <p class="auth-subtitle">Let's continue your festive journey</p>
+          <h3 class="auth-heading">Sign In</h3>
+          <div class="auth-ornamental-divider">
+            <span class="line"></span>
+            <span class="symbol">🪷</span>
+            <span class="line"></span>
+          </div>
+
+          <div class="form-group">
+            <label>EMAIL</label>
+            <div class="input-with-icon">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" id="loginEmail" placeholder="your@email.com">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>PASSWORD</label>
+            <div class="input-with-icon">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" id="loginPass" placeholder="••••••••">
+              <i class="fas fa-eye pass-toggle" onclick="togglePassVisibility('loginPass', this)"></i>
+            </div>
+            <div class="forgot-pass-wrapper">
+              <a href="javascript:void(0)" onclick="alert('Password reset link sent to your email.')" class="forgot-pass-link">Forgot Password?</a>
+            </div>
+          </div>
+
+          <button class="btn-primary pill-btn" onclick="handleAuth()">LOGIN <i class="fas fa-arrow-right"></i></button>
+
+          <p class="auth-footer-text">Don't have an account? <a href="javascript:void(0)" onclick="toggleAuth(false)" class="auth-switch-link">Register</a></p>
+          <div class="auth-ornamental-divider small">
+            <span class="line"></span>
+            <span class="symbol">🪷</span>
+            <span class="line"></span>
+          </div>
+          <p class="auth-admin-note">Admin? Use your secret password above.</p>
         </div>
-        <div class="form-group"><label>Password</label><input type="password" id="loginPass" placeholder="******"></div>
-        <button class="btn-primary" style="width:100%" onclick="handleAuth()">Login</button>
-      </div>
-      <div id="registerView" style="display:none">
-        <span class="section-label">Join ROKEA by RK</span>
-        <h3 style="margin-bottom: 20px; font-family: 'Playfair Display', serif; font-size: 28px;">New Account</h3>
-        <div class="form-group"><label>Full Name</label><input type="text" id="regName" placeholder="John Doe"></div>
-        <div class="form-group"><label>Email</label><input type="email" id="regEmail" placeholder="your@email.com">
+
+        <!-- Register Form -->
+        <div id="registerView" style="display:none">
+          <div class="auth-top-ornament">🪷</div>
+          <span class="section-label">JOIN ROKEA BY RK</span>
+          <p class="auth-subtitle">Begin your festive journey</p>
+          <h3 class="auth-heading">Sign Up</h3>
+          <div class="auth-ornamental-divider">
+            <span class="line"></span>
+            <span class="symbol">🪷</span>
+            <span class="line"></span>
+          </div>
+
+          <div class="form-group">
+            <label>FULL NAME</label>
+            <div class="input-with-icon">
+              <i class="fas fa-user input-icon"></i>
+              <input type="text" id="regName" placeholder="John Doe">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>EMAIL</label>
+            <div class="input-with-icon">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" id="regEmail" placeholder="your@email.com">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>PHONE</label>
+            <div class="input-with-icon">
+              <i class="fas fa-phone input-icon"></i>
+              <input type="tel" id="regPhone" placeholder="9876543210">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>PASSWORD</label>
+            <div class="input-with-icon">
+              <i class="fas fa-lock input-icon"></i>
+              <input type="password" id="regPass" placeholder="••••••••">
+              <i class="fas fa-eye pass-toggle" onclick="togglePassVisibility('regPass', this)"></i>
+            </div>
+          </div>
+
+          <button class="btn-primary pill-btn" onclick="handleRegister()">SIGN UP <i class="fas fa-arrow-right"></i></button>
+
+          <p class="auth-footer-text">Already have an account? <a href="javascript:void(0)" onclick="toggleAuth(true)" class="auth-switch-link">Login</a></p>
         </div>
-        <div class="form-group"><label>Phone</label><input type="tel" id="regPhone" placeholder="9876543210"></div>
-        <div class="form-group"><label>Password</label><input type="password" id="regPass" placeholder="******"></div>
-        <button class="btn-primary" style="width:100%" onclick="handleRegister()">Sign Up</button>
       </div>
     </div>
   </div>
 
   <!-- WISHLIST MODAL -->
   <div id="wishlistModal" class="modal">
-    <div class="modal-content side-drawer" style="background: var(--ivory);">
+    <div class="modal-content side-drawer">
       <span class="modal-close" onclick="toggleWishlist()">×</span>
       <h2 class="section-title">Your <em>Wishlist</em></h2>
       <div id="wishlist-items" class="cart-items-list" style="margin-top: 30px;"></div>

@@ -1,6 +1,11 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
+  "functions": {
+    "api/product.js": {
+      "includeFiles": "product-details.html"
+    }
+  },
   "headers": [
     {
       "source": "/(.*)\\.(css|js|png|jpg|jpeg|gif|webp|svg|ico|avif|woff|woff2|ttf|eot)",

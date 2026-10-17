@@ -576,15 +576,42 @@ const loginView = document.getElementById('loginView');
 const regView = document.getElementById('registerView');
 
 window.openAuth = () => {
-  if (authModal) { authModal.style.display = 'flex'; document.body.classList.add('modal-open'); }
+  if (authModal) {
+    authModal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+    void authModal.offsetWidth;
+    authModal.classList.add('active');
+  }
 }
 window.closeAuth = () => {
-  if (authModal) { authModal.style.display = 'none'; document.body.classList.remove('modal-open'); }
+  if (authModal) {
+    authModal.classList.remove('active');
+    setTimeout(() => {
+      authModal.style.display = 'none';
+      document.body.classList.remove('modal-open');
+    }, 300);
+  }
 }
 window.toggleAuth = (showLogin) => {
   if (loginView) loginView.style.display = showLogin ? 'block' : 'none';
   if (regView) regView.style.display = showLogin ? 'none' : 'block';
+  if (authModal && authModal.classList.contains('active')) {
+    authModal.classList.remove('active');
+    void authModal.offsetWidth;
+    authModal.classList.add('active');
+  }
 }
+window.togglePassVisibility = (inputId, iconEl) => {
+  const inp = document.getElementById(inputId);
+  if (!inp) return;
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    if (iconEl) iconEl.classList.replace('fa-eye', 'fa-eye-slash');
+  } else {
+    inp.type = 'password';
+    if (iconEl) iconEl.classList.replace('fa-eye-slash', 'fa-eye');
+  }
+};
 
 // REEL MODAL LOGIC
 const reelVideos = {
@@ -1897,18 +1924,32 @@ function handleMainImgSwipe() {
   }
 }
 
-// LEAD POPUP LOGIC
+// LEAD POPUP & FIREWORKS LOGIC
+window.openLeadModal = () => {
+  const leadModal = document.getElementById('leadModal');
+  if (leadModal) {
+    leadModal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+    if (typeof window.triggerPattasuFireworks === 'function') {
+      window.triggerPattasuFireworks(4500);
+    }
+  }
+};
+
 setTimeout(() => {
   const leadModal = document.getElementById('leadModal');
   if (leadModal && !sessionStorage.getItem('leadShown')) {
-    leadModal.style.display = 'flex';
+    window.openLeadModal();
     sessionStorage.setItem('leadShown', 'true');
   }
-}, 8000);
+}, 7000);
 
 window.closeLeadModal = () => {
   const modal = document.getElementById('leadModal');
-  if (modal) modal.style.display = 'none';
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+  }
 }
 
 window.handleLead = (e) => {
@@ -1929,6 +1970,11 @@ window.handleLead = (e) => {
     db.collection("leads").add(leadData)
       .then(() => console.log("Lead saved to Firestore!"))
       .catch(err => console.error("Firestore lead error:", err));
+  }
+
+  // Trigger celebration fireworks (pattasu)
+  if (typeof window.triggerPattasuFireworks === 'function') {
+    window.triggerPattasuFireworks(5000);
   }
 
   alert("Thank you, " + name + "! Our master stylist will contact you shortly.");
@@ -3147,9 +3193,18 @@ function initTestimonialCarousel() {
 }
 
 document.addEventListener('DOMContentLoaded', initTestimonialCarousel);
-// Custom Blouse Booking Logic - Direct Google Form Open
+// Custom Blouse Booking Logic - Direct Google Form Open with Pattasu Fireworks
 window.openBlouseBooking = () => {
-  window.open('https://forms.gle/xHJ6hSpyreHVNsNc8', '_blank');
+  if (typeof window.triggerPattasuFireworks === 'function') {
+    window.triggerPattasuFireworks(4000);
+  }
+  const modal = document.getElementById('blouseModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.body.classList.add('modal-open');
+  } else {
+    window.open('https://forms.gle/xHJ6hSpyreHVNsNc8', '_blank');
+  }
 }
 
 // FAQ Accordion Toggle
@@ -3278,3 +3333,410 @@ window.shareProduct = function (productId) {
     });
   }
 };
+
+/* ==========================================================================
+   PATTASU FIREWORKS ENGINE (Festive Crackers Explosion Effect)
+   ========================================================================== */
+window.triggerPattasuFireworks = function (durationMs = 4500) {
+  let canvas = document.getElementById('pattasuFireworksCanvas');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = 'pattasuFireworksCanvas';
+    canvas.style.position = 'fixed';
+    canvas.style.top = '0';
+    canvas.style.left = '0';
+    canvas.style.width = '100vw';
+    canvas.style.height = '100vh';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '999999';
+    document.body.appendChild(canvas);
+  }
+
+  const ctx = canvas.getContext('2d');
+  let width = (canvas.width = window.innerWidth);
+  let height = (canvas.height = window.innerHeight);
+
+  const handleResize = () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+  };
+  window.addEventListener('resize', handleResize);
+
+  const colors = [
+    '#ffd700', // Metallic Gold
+    '#ff3366', // Crimson Flare
+    '#ff9900', // Amber Diya
+    '#00f2fe', // Turquoise Spark
+    '#00ff87', // Emerald Star
+    '#ff007f', // Deep Fuchsia
+    '#ffffff', // Diamond White
+    '#ffea00'  // Bright Yellow
+  ];
+
+  class Rocket {
+    constructor(x, targetY, color) {
+      this.x = x;
+      this.y = height;
+      this.targetY = targetY;
+      this.color = color;
+      this.speed = 9 + Math.random() * 6;
+      this.angle = -Math.PI / 2 + (Math.random() - 0.5) * 0.25;
+      this.vx = Math.cos(this.angle) * this.speed;
+      this.vy = Math.sin(this.angle) * this.speed;
+      this.exploded = false;
+      this.trail = [];
+    }
+
+    update() {
+      this.trail.push({ x: this.x, y: this.y, alpha: 1 });
+      if (this.trail.length > 8) this.trail.shift();
+      this.trail.forEach(t => (t.alpha -= 0.12));
+
+      this.x += this.vx;
+      this.y += this.vy;
+      this.vy += 0.06;
+
+      if (this.vy >= 0 || this.y <= this.targetY) {
+        this.exploded = true;
+        createExplosion(this.x, this.y, this.color);
+      }
+    }
+
+    draw() {
+      this.trail.forEach(t => {
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 215, 0, ${t.alpha})`;
+        ctx.fill();
+      });
+
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 3.5, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.shadowBlur = 14;
+      ctx.shadowColor = this.color;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  class Particle {
+    constructor(x, y, color, isSparkler = false) {
+      this.x = x;
+      this.y = y;
+      this.color = color;
+      const speed = isSparkler ? Math.random() * 12 + 2 : Math.random() * 8 + 1;
+      const angle = Math.random() * Math.PI * 2;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.gravity = 0.12;
+      this.friction = 0.96;
+      this.alpha = 1;
+      this.decay = Math.random() * 0.02 + 0.012;
+      this.size = Math.random() * 3.5 + 1.5;
+      this.sparkle = Math.random() > 0.4;
+    }
+
+    update() {
+      this.vx *= this.friction;
+      this.vy *= this.friction;
+      this.vy += this.gravity;
+      this.x += this.vx;
+      this.y += this.vy;
+      this.alpha -= this.decay;
+    }
+
+    draw() {
+      if (this.alpha <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = this.sparkle && Math.random() > 0.4 ? this.alpha * 0.5 : this.alpha;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = this.color;
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  class FountainParticle {
+    constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.vx = (Math.random() - 0.5) * 4.5;
+      this.vy = -(Math.random() * 11 + 10);
+      this.gravity = 0.35;
+      this.alpha = 1;
+      this.decay = Math.random() * 0.03 + 0.015;
+      this.color = Math.random() > 0.5 ? '#ffd700' : '#ffffff';
+      this.size = Math.random() * 2.5 + 1;
+    }
+    update() {
+      this.vy += this.gravity;
+      this.x += this.vx;
+      this.y += this.vy;
+      this.alpha -= this.decay;
+    }
+    draw() {
+      if (this.alpha <= 0) return;
+      ctx.save();
+      ctx.globalAlpha = this.alpha;
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = '#ffd700';
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  let rockets = [];
+  let particles = [];
+  let fountains = [];
+
+  function createExplosion(x, y, color) {
+    const particleCount = 65 + Math.floor(Math.random() * 35);
+    for (let i = 0; i < particleCount; i++) {
+      particles.push(new Particle(x, y, color));
+    }
+    for (let i = 0; i < 22; i++) {
+      particles.push(new Particle(x, y, '#ffd700', true));
+    }
+  }
+
+  const startTime = Date.now();
+  let animId;
+
+  const launchInterval = setInterval(() => {
+    if (Date.now() - startTime > durationMs - 1000) {
+      clearInterval(launchInterval);
+      return;
+    }
+    for (let i = 0; i < 2; i++) {
+      const rx = Math.random() * (width * 0.8) + width * 0.1;
+      const ry = Math.random() * (height * 0.4) + height * 0.15;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      rockets.push(new Rocket(rx, ry, color));
+    }
+    if (Math.random() > 0.3) {
+      const fx = Math.random() > 0.5 ? width * 0.15 : width * 0.85;
+      for (let f = 0; f < 15; f++) {
+        fountains.push(new FountainParticle(fx, height));
+      }
+    }
+  }, 350);
+
+  // Initial burst
+  for (let i = 0; i < 3; i++) {
+    const rx = Math.random() * (width * 0.6) + width * 0.2;
+    const ry = Math.random() * (height * 0.35) + height * 0.15;
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    rockets.push(new Rocket(rx, ry, color));
+  }
+
+  function loop() {
+    ctx.clearRect(0, 0, width, height);
+
+    rockets.forEach((r, idx) => {
+      r.update();
+      r.draw();
+      if (r.exploded) rockets.splice(idx, 1);
+    });
+
+    particles.forEach((p, idx) => {
+      p.update();
+      p.draw();
+      if (p.alpha <= 0) particles.splice(idx, 1);
+    });
+
+    fountains.forEach((f, idx) => {
+      f.update();
+      f.draw();
+      if (f.alpha <= 0) fountains.splice(idx, 1);
+    });
+
+    if (Date.now() - startTime < durationMs || rockets.length > 0 || particles.length > 0 || fountains.length > 0) {
+      animId = requestAnimationFrame(loop);
+    } else {
+      cancelAnimationFrame(animId);
+      window.removeEventListener('resize', handleResize);
+      ctx.clearRect(0, 0, width, height);
+      if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
+    }
+  }
+
+  loop();
+};
+
+window.triggerFireworks = window.triggerPattasuFireworks;
+
+// Auto-trigger pattasu fireworks when custom blouse order form page or lead form opens
+document.addEventListener('DOMContentLoaded', () => {
+  const isCustomBlousePage = window.location.pathname.includes('custom-blouse-order') ||
+                             document.querySelector('.google-form-container') ||
+                             document.getElementById('customBlouseForm');
+  if (isCustomBlousePage) {
+    setTimeout(() => {
+      if (typeof window.triggerPattasuFireworks === 'function') {
+        window.triggerPattasuFireworks(4500);
+      }
+    }, 600);
+  }
+});
+
+/* ==========================================================================
+   HERO TITLE LETTER-BY-LETTER REVEAL ANIMATION
+   ========================================================================== */
+function initHeroLetterReveal() {
+  const title = document.querySelector('.hero-title');
+  if (!title || title.getAttribute('data-letter-split') === 'true') return;
+
+  title.setAttribute('data-letter-split', 'true');
+  const childNodes = Array.from(title.childNodes);
+  title.innerHTML = '';
+
+  let charIndex = 0;
+  const baseDelay = 0.35;
+
+  childNodes.forEach(node => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === ' ' || char === '\n') {
+          title.appendChild(document.createTextNode(char));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'hero-char';
+          span.textContent = char;
+          span.style.animationDelay = `${(baseDelay + charIndex * 0.035).toFixed(3)}s`;
+          title.appendChild(span);
+          charIndex++;
+        }
+      }
+    } else if (node.nodeName === 'EM') {
+      const em = document.createElement('em');
+      const text = node.textContent;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === ' ' || char === '\n') {
+          em.appendChild(document.createTextNode(char));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'hero-char';
+          span.textContent = char;
+          span.style.animationDelay = `${(baseDelay + charIndex * 0.035).toFixed(3)}s`;
+          em.appendChild(span);
+          charIndex++;
+        }
+      }
+      title.appendChild(em);
+    } else if (node.nodeName === 'BR') {
+      title.appendChild(document.createElement('br'));
+    } else {
+      title.appendChild(node.cloneNode(true));
+    }
+  });
+}
+
+/* ==========================================================================
+   CATEGORY SECTION - LETTER-BY-LETTER TITLE & STAGGERED SCROLL REVEAL
+   ========================================================================== */
+function initCategoryTitleReveal() {
+  const title = document.querySelector('.products-main-title');
+  if (!title || title.getAttribute('data-letter-split') === 'true') return;
+
+  title.setAttribute('data-letter-split', 'true');
+  const childNodes = Array.from(title.childNodes);
+  title.innerHTML = '';
+
+  let charIndex = 0;
+  const baseDelay = 0.3; // Starts after header icon reveal
+
+  childNodes.forEach(node => {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === ' ' || char === '\n') {
+          title.appendChild(document.createTextNode(char));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'cat-title-char';
+          span.textContent = char;
+          span.style.animationDelay = `${(baseDelay + charIndex * 0.03).toFixed(3)}s`;
+          title.appendChild(span);
+          charIndex++;
+        }
+      }
+    } else if (node.nodeName === 'EM') {
+      const em = document.createElement('em');
+      if (node.className) em.className = node.className;
+      const text = node.textContent;
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        if (char === ' ' || char === '\n') {
+          em.appendChild(document.createTextNode(char));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'cat-title-char';
+          span.textContent = char;
+          span.style.animationDelay = `${(baseDelay + charIndex * 0.03).toFixed(3)}s`;
+          em.appendChild(span);
+          charIndex++;
+        }
+      }
+      title.appendChild(em);
+    } else if (node.nodeName === 'BR') {
+      title.appendChild(document.createElement('br'));
+    } else {
+      title.appendChild(node.cloneNode(true));
+    }
+  });
+}
+
+function initCategoryScrollReveal() {
+  const section = document.querySelector('.products-section');
+  if (!section) return;
+
+  // Split category title letters first
+  initCategoryTitleReveal();
+
+  // Mark JS reveal ready so initial hidden state is applied smoothly
+  section.classList.add('js-reveal-ready');
+
+  const triggerReveal = () => {
+    section.classList.add('cat-revealed');
+  };
+
+  if ('IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          triggerReveal();
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      root: null,
+      threshold: 0.1,
+      rootMargin: '0px 0px -30px 0px'
+    });
+
+    observer.observe(section);
+  } else {
+    triggerReveal();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initHeroLetterReveal();
+  initCategoryScrollReveal();
+});
+
+if (document.readyState === 'interactive' || document.readyState === 'complete') {
+  initHeroLetterReveal();
+  initCategoryScrollReveal();
+}

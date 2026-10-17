@@ -1,5 +1,9 @@
 .env
+.env*.local
 node_modules/
 .firebase/
-.env
 serviceAccountKey.json
+.vercel/
+.vscode/
+.DS_Store
+Thumbs.db
