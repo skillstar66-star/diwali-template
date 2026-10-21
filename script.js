@@ -575,14 +575,22 @@ const authModal = document.getElementById('authModal');
 const loginView = document.getElementById('loginView');
 const regView = document.getElementById('registerView');
 
-window.openAuth = () => {
+window.openAuth = (initialView = 'login') => {
   if (authModal) {
+    if (typeof window.toggleAuth === 'function') {
+      window.toggleAuth(initialView);
+    }
     authModal.style.display = 'flex';
     document.body.classList.add('modal-open');
+    const vid = authModal.querySelector('.auth-bg-video');
+    if (vid) vid.play().catch(() => {});
+    const modalContent = authModal.querySelector('.modal-content');
+    if (modalContent) modalContent.scrollTop = 0;
     void authModal.offsetWidth;
     authModal.classList.add('active');
   }
-}
+};
+
 window.closeAuth = () => {
   if (authModal) {
     authModal.classList.remove('active');
@@ -591,16 +599,129 @@ window.closeAuth = () => {
       document.body.classList.remove('modal-open');
     }, 300);
   }
-}
-window.toggleAuth = (showLogin) => {
-  if (loginView) loginView.style.display = showLogin ? 'block' : 'none';
-  if (regView) regView.style.display = showLogin ? 'none' : 'block';
+};
+
+window.toggleAuth = (view) => {
+  const loginV = document.getElementById('loginView');
+  const regV = document.getElementById('registerView');
+  const forgotV = document.getElementById('forgotView');
+
+  // Support boolean (true = login, false = register) or string ('login', 'register', 'forgot')
+  let currentView = 'login';
+  if (view === true || view === 'login') currentView = 'login';
+  else if (view === false || view === 'register') currentView = 'register';
+  else if (view === 'forgot') currentView = 'forgot';
+
+  if (loginV) loginV.style.display = currentView === 'login' ? 'block' : 'none';
+  if (regV) regV.style.display = currentView === 'register' ? 'block' : 'none';
+  if (forgotV) {
+    forgotV.style.display = currentView === 'forgot' ? 'block' : 'none';
+    if (currentView === 'forgot') {
+      const loginEmail = document.getElementById('loginEmail');
+      const forgotEmail = document.getElementById('forgotEmail');
+      if (loginEmail && forgotEmail && loginEmail.value.trim() && !forgotEmail.value.trim()) {
+        forgotEmail.value = loginEmail.value.trim();
+      }
+    }
+  }
+
+  const modalContent = authModal ? authModal.querySelector('.modal-content') : null;
+  if (modalContent) modalContent.scrollTop = 0;
+
   if (authModal && authModal.classList.contains('active')) {
     authModal.classList.remove('active');
     void authModal.offsetWidth;
     authModal.classList.add('active');
   }
-}
+};
+
+window.openForgotPassword = () => {
+  const forgotV = document.getElementById('forgotView');
+  if (forgotV) {
+    window.toggleAuth('forgot');
+  } else {
+    window.handleForgotPassword();
+  }
+};
+
+window.handleForgotPassword = () => {
+  const forgotEmailInput = document.getElementById('forgotEmail');
+  const loginEmailInput = document.getElementById('loginEmail');
+  let email = '';
+
+  if (forgotEmailInput && forgotEmailInput.value.trim()) {
+    email = forgotEmailInput.value.trim();
+  } else if (loginEmailInput && loginEmailInput.value.trim()) {
+    email = loginEmailInput.value.trim();
+  }
+
+  if (!email) {
+    email = prompt("Enter your registered email to receive a password reset link:");
+    if (!email) return;
+    email = email.trim();
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    if (typeof showToast === 'function') {
+      showToast("Invalid Email", "info", "Please enter a valid email address.");
+    } else {
+      alert("Please enter a valid email address.");
+    }
+    return;
+  }
+
+  const submitBtn = document.getElementById('forgotSubmitBtn');
+  const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Sending Link... <i class="fas fa-spinner fa-spin"></i>';
+  }
+
+  if (!window.firebase || !firebase.auth) {
+    alert("Authentication service is currently unavailable. Please check your internet connection.");
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalBtnHtml;
+    }
+    return;
+  }
+
+  firebase.auth().sendPasswordResetEmail(email)
+    .then(() => {
+      const msg = "A secure password reset link has been sent to " + email + ". Please check your inbox and spam folder.";
+      if (typeof showToast === 'function') {
+        showToast("Password Reset Sent", "success", msg);
+      } else {
+        alert(msg);
+      }
+      setTimeout(() => {
+        window.toggleAuth('login');
+      }, 2500);
+    })
+    .catch((error) => {
+      console.error("Firebase sendPasswordResetEmail error:", error);
+      let errMsg = error.message;
+      if (error.code === 'auth/user-not-found') {
+        errMsg = "No account found with this email. Please check the spelling or Register a new account.";
+      } else if (error.code === 'auth/invalid-email') {
+        errMsg = "The email address is badly formatted.";
+      } else if (error.code === 'auth/too-many-requests') {
+        errMsg = "Too many reset attempts. Please try again after a few minutes.";
+      }
+      if (typeof showToast === 'function') {
+        showToast("Reset Failed", "info", errMsg);
+      } else {
+        alert(errMsg);
+      }
+    })
+    .finally(() => {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalBtnHtml;
+      }
+    });
+};
 window.togglePassVisibility = (inputId, iconEl) => {
   const inp = document.getElementById(inputId);
   if (!inp) return;
@@ -711,15 +832,39 @@ firebase.auth().onAuthStateChanged((user) => {
           currentUser.uid = user.uid;
           localStorage.setItem('saforio_currentUser', JSON.stringify(currentUser));
           updateUserUI();
+        } else {
+          currentUser = {
+            uid: user.uid,
+            email: user.email,
+            name: user.displayName || (user.email ? user.email.split('@')[0] : 'User')
+          };
+          localStorage.setItem('saforio_currentUser', JSON.stringify(currentUser));
+          updateUserUI();
         }
+      }).catch((err) => {
+        console.warn("Could not fetch user doc:", err);
+        currentUser = {
+          uid: user.uid,
+          email: user.email,
+          name: user.displayName || (user.email ? user.email.split('@')[0] : 'User')
+        };
+        localStorage.setItem('saforio_currentUser', JSON.stringify(currentUser));
+        updateUserUI();
       });
+    } else {
+      currentUser = {
+        uid: user.uid,
+        email: user.email,
+        name: user.displayName || (user.email ? user.email.split('@')[0] : 'User')
+      };
+      localStorage.setItem('saforio_currentUser', JSON.stringify(currentUser));
+      updateUserUI();
     }
   } else {
     // User is signed out
     currentUser = null;
     localStorage.removeItem('saforio_currentUser');
-    const link = document.getElementById('userLinkCont');
-    if (link) link.innerHTML = '<a href="javascript:void(0)" onclick="openAuth()" id="navLogin">Login / Register</a>';
+    updateUserUI();
   }
 });
 
@@ -727,61 +872,129 @@ firebase.auth().onAuthStateChanged((user) => {
 function updateUserUI() {
   const link = document.getElementById('userLinkCont');
   const mobileLink = document.getElementById('mobileLoginCont');
+  let mobileNavCont = document.getElementById('mobileUserNavCont');
 
   if (currentUser) {
-    const firstInitial = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : 'U';
-    const shortName = currentUser.name ? currentUser.name.split(' ')[0] : 'User';
+    const firstInitial = currentUser.name ? currentUser.name.charAt(0).toUpperCase() : (currentUser.email ? currentUser.email.charAt(0).toUpperCase() : 'U');
+    const shortName = currentUser.name ? currentUser.name.split(' ')[0] : (currentUser.email ? currentUser.email.split('@')[0] : 'User');
+    const fullName = currentUser.name || shortName;
+    const userEmail = currentUser.email || '';
 
     const profileHtml = `
-      <div class="user-profile-cont" onclick="toggleUserDropdown(event)">
+      <div class="user-profile-cont" onclick="toggleUserDropdown(event)" role="button" tabindex="0" aria-label="User Account">
         <div class="user-info-text">
           <span class="user-welcome">Welcome</span>
           <span class="user-name-display">${shortName}</span>
         </div>
         <div class="user-avatar-badge">${firstInitial}</div>
         
-        <div class="user-dropdown" id="userDropdown">
+        <div class="user-dropdown" id="userDropdown" onclick="event.stopPropagation()">
           <div class="dropdown-header">
-            <div class="user-avatar-badge" style="width: 50px; height: 50px; font-size: 20px;">${firstInitial}</div>
-            <div style="font-family:'Playfair Display',serif; font-weight:700; color:var(--dark);">${currentUser.name}</div>
-            <div style="font-size:10px; color:var(--muted);">${currentUser.email}</div>
+            <div class="dropdown-header-avatar">${firstInitial}</div>
+            <div class="dropdown-user-name">${fullName}</div>
+            <div class="dropdown-user-email">${userEmail}</div>
           </div>
-          <a href="javascript:void(0)" class="dropdown-item" onclick="toggleWishlist()">
-            <span>✦</span> My Wishlist
+          <a href="javascript:void(0)" class="dropdown-item" onclick="closeAllUserDropdowns(); toggleWishlist()">
+            <span class="item-icon">✦</span> My Wishlist
           </a>
-          <a href="javascript:void(0)" class="dropdown-item" onclick="toggleCart()">
-            <span>✦</span> My Shopping Cart
+          <a href="javascript:void(0)" class="dropdown-item" onclick="closeAllUserDropdowns(); toggleCart()">
+            <span class="item-icon">✦</span> My Shopping Cart
           </a>
           <a href="javascript:void(0)" class="dropdown-item logout-item" onclick="logoutUser()">
-            <span>✕</span> Sign Out
+            <span class="item-icon">✕</span> Sign Out
           </a>
         </div>
       </div>
     `;
 
     if (link) link.innerHTML = profileHtml;
-    if (mobileLink) mobileLink.innerHTML = `<a href="javascript:void(0)" onclick="logoutUser()" style="color:#ff4d4d">Logout (${shortName})</a>`;
+
+    // Mobile nav bar avatar inside .nav-actions
+    const navActions = document.querySelector('.nav-actions');
+    if (navActions && !mobileNavCont) {
+      mobileNavCont = document.createElement('div');
+      mobileNavCont.id = 'mobileUserNavCont';
+      mobileNavCont.className = 'mobile-user-nav-cont';
+      navActions.appendChild(mobileNavCont);
+    }
+
+    if (mobileNavCont) {
+      mobileNavCont.innerHTML = `
+        <div class="user-profile-cont mobile-profile-cont" onclick="toggleMobileUserDropdown(event)" role="button" tabindex="0" aria-label="User Account">
+          <div class="user-avatar-badge">${firstInitial}</div>
+          <div class="user-dropdown mobile-dropdown" id="mobileUserDropdown" onclick="event.stopPropagation()">
+            <div class="dropdown-header">
+              <div class="dropdown-header-avatar">${firstInitial}</div>
+              <div class="dropdown-user-name">${fullName}</div>
+              <div class="dropdown-user-email">${userEmail}</div>
+            </div>
+            <a href="javascript:void(0)" class="dropdown-item" onclick="closeAllUserDropdowns(); toggleWishlist()">
+              <span class="item-icon">✦</span> My Wishlist
+            </a>
+            <a href="javascript:void(0)" class="dropdown-item" onclick="closeAllUserDropdowns(); toggleCart()">
+              <span class="item-icon">✦</span> My Shopping Cart
+            </a>
+            <a href="javascript:void(0)" class="dropdown-item logout-item" onclick="logoutUser()">
+              <span class="item-icon">✕</span> Sign Out
+            </a>
+          </div>
+        </div>
+      `;
+    }
+
+    if (mobileLink) {
+      mobileLink.innerHTML = `
+        <div class="mobile-drawer-user-info" style="padding: 12px 14px; background: rgba(255, 255, 255, 0.05); border-radius: 8px; margin: 8px 0; border: 1px solid rgba(212, 175, 55, 0.2);">
+          <div style="font-weight: 600; color: #fff; font-size: 14px; font-family: 'Playfair Display', serif;">${fullName}</div>
+          <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 8px;">${userEmail}</div>
+          <a href="javascript:void(0)" onclick="logoutUser()" style="color: #ff6b6b; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Sign Out</a>
+        </div>
+      `;
+    }
+  } else {
+    if (link) link.innerHTML = '<a href="javascript:void(0)" onclick="openAuth()" id="navLogin">Login / Register</a>';
+    if (mobileLink) mobileLink.innerHTML = '<a href="javascript:void(0)" onclick="toggleMobileMenu(); openAuth()">Login / Register</a>';
+    if (mobileNavCont) mobileNavCont.innerHTML = '';
   }
 }
 
+window.closeAllUserDropdowns = () => {
+  const dropdown = document.getElementById('userDropdown');
+  if (dropdown) dropdown.classList.remove('active');
+  const mobileDropdown = document.getElementById('mobileUserDropdown');
+  if (mobileDropdown) mobileDropdown.classList.remove('active');
+};
+
 window.toggleUserDropdown = (e) => {
-  e.stopPropagation();
+  if (e) e.stopPropagation();
   const dropdown = document.getElementById('userDropdown');
   if (dropdown) dropdown.classList.toggle('active');
-}
+  const mobileDropdown = document.getElementById('mobileUserDropdown');
+  if (mobileDropdown) mobileDropdown.classList.remove('active');
+};
+
+window.toggleMobileUserDropdown = (e) => {
+  if (e) e.stopPropagation();
+  const mobileDropdown = document.getElementById('mobileUserDropdown');
+  if (mobileDropdown) mobileDropdown.classList.toggle('active');
+  const dropdown = document.getElementById('userDropdown');
+  if (dropdown) dropdown.classList.remove('active');
+};
 
 // Close dropdown on click outside
 window.addEventListener('click', () => {
-  const dropdown = document.getElementById('userDropdown');
-  if (dropdown) dropdown.classList.remove('active');
+  closeAllUserDropdowns();
 });
 
 window.logoutUser = () => {
   firebase.auth().signOut().then(() => {
     localStorage.removeItem('saforio_currentUser');
     location.reload();
+  }).catch(() => {
+    localStorage.removeItem('saforio_currentUser');
+    location.reload();
   });
-}
+};
 
 window.toggleAdminMenu = (forceClose = false) => {
   if (window.innerWidth > 1024) return;
@@ -1981,6 +2194,117 @@ window.handleLead = (e) => {
   closeLeadModal();
 }
 
+// NEWSLETTER SUBSCRIPTION HANDLER
+window.handleNewsletterSubscribe = (e) => {
+  if (e) e.preventDefault();
+  const input = document.getElementById('newsletterEmail') || document.querySelector('.nl-input');
+  if (!input) return;
+
+  const email = input.value.trim();
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (!email || !emailRegex.test(email)) {
+    if (typeof showToast === 'function') {
+      showToast("Invalid Email", "info", "Please enter a valid email address.");
+    } else {
+      alert("Please enter a valid email address.");
+    }
+    input.focus();
+    return;
+  }
+
+  const btn = document.getElementById('newsletterBtn') || document.querySelector('.nl-btn');
+  const originalText = btn ? btn.innerHTML : 'Subscribe';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = 'Subscribing...';
+  }
+
+  const subData = {
+    email: email,
+    subscribedAt: new Date().toISOString(),
+    source: 'Exclusive Offers Newsletter'
+  };
+
+  // 1. Save to localStorage
+  try {
+    const subs = JSON.parse(localStorage.getItem('saforio_newsletter_subscribers')) || [];
+    if (!subs.some(s => s.email === email)) {
+      subs.push(subData);
+      localStorage.setItem('saforio_newsletter_subscribers', JSON.stringify(subs));
+    }
+  } catch (err) {
+    console.error("Local newsletter save error:", err);
+  }
+
+  // 2. Save to Firestore (both newsletter and leads collections)
+  if (window.db) {
+    try {
+      db.collection("newsletter").add(subData).catch(e => console.warn("Firestore newsletter write error:", e));
+      db.collection("leads").add({
+        name: email.split('@')[0],
+        email: email,
+        phone: 'Newsletter',
+        interest: 'Exclusive Offers Newsletter',
+        date: new Date().toISOString()
+      }).catch(e => console.warn("Firestore lead write error:", e));
+    } catch (err) {
+      console.error("Firestore write error:", err);
+    }
+  }
+
+  // 3. Trigger celebration fireworks if available
+  if (typeof window.triggerPattasuFireworks === 'function') {
+    window.triggerPattasuFireworks(4000);
+  }
+
+  // 4. Update UI & Feedback
+  if (btn) {
+    btn.innerHTML = 'Subscribed! ✓';
+    btn.style.background = '#2e7d32';
+    btn.style.color = '#ffffff';
+  }
+
+  const successEl = document.getElementById('newsletterSuccess');
+  if (successEl) {
+    successEl.style.display = 'block';
+  }
+
+  if (typeof showToast === 'function') {
+    showToast("Subscribed Successfully!", "success", "Welcome to ROKEA Privé! You will now receive exclusive offers & bridal lookbooks.");
+  } else {
+    alert("Thank you for subscribing to ROKEA by RK exclusive offers!");
+  }
+
+  input.value = '';
+
+  setTimeout(() => {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+      btn.style.background = '';
+      btn.style.color = '';
+    }
+    if (successEl) {
+      setTimeout(() => { successEl.style.display = 'none'; }, 6000);
+    }
+  }, 3500);
+};
+
+// Also attach event listener to newsletter form or button on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+  const nlForm = document.getElementById('newsletterForm');
+  if (nlForm) {
+    nlForm.addEventListener('submit', window.handleNewsletterSubscribe);
+  }
+  const nlBtn = document.getElementById('newsletterBtn') || document.querySelector('.nl-btn');
+  if (nlBtn && (!nlForm || nlBtn.form !== nlForm)) {
+    nlBtn.addEventListener('click', (e) => {
+      window.handleNewsletterSubscribe(e);
+    });
+  }
+});
+
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
   @keyframes fadeInUp {
@@ -2252,54 +2576,118 @@ window.shareTo = (platform) => {
 // AI Stylist Logic
 let stylistCache = new Map();
 
-let faceapiLoaded = false;
-async function loadFaceAPI() {
-  if (faceapiLoaded) return true;
-  if (!window.faceapi) {
-    try {
-      await new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js';
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-    } catch (e) {
-      console.error("Failed to load FaceAPI script", e);
-      return false;
-    }
+const fallbackStylistProducts = [
+  {
+    id: 'saree_royal_crimson',
+    name: 'Kanjivaram Crimson Red Pure Silk Saree',
+    category: 'sarees',
+    price: 4499,
+    image: 'image copy 2.png',
+    imageHover: 'image copy 3.png',
+    stylistRole: 'Exquisite Silk Saree',
+    slug: 'kanjivaram-crimson-red-pure-silk-saree',
+    description: 'Pure handloom silk saree with rich gold zari border, curated for royal occasions.'
+  },
+  {
+    id: 'jewel_temple_nakshi',
+    name: 'Antique Temple Lakshmi Nakshi Choker Set',
+    category: 'imitation',
+    price: 2499,
+    image: 'temple_jewellery_set.png',
+    imageHover: 'temple_jewellery_set.png',
+    stylistRole: 'Heritage Jewellery Set',
+    slug: 'antique-temple-lakshmi-nakshi-choker-set',
+    description: 'Traditional handcrafted temple jewellery set adorned with auspicious motifs.'
+  },
+  {
+    id: 'jewel_kundan_jhumkas',
+    name: 'Royal Kundan Gold Plated Jhumkas',
+    category: 'imitation',
+    price: 999,
+    image: 'image copy 5.png',
+    imageHover: 'image copy 6.png',
+    stylistRole: 'Matching Royal Earrings',
+    slug: 'royal-kundan-gold-plated-jhumkas',
+    description: 'Festive handcrafted Kundan drop jhumkas that perfectly complete your ensemble.'
   }
-  const modelPath = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
-  try {
-    await Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri(modelPath),
-      faceapi.nets.ageGenderNet.loadFromUri(modelPath)
-    ]);
-    faceapiLoaded = true;
-    return true;
-  } catch (err) {
-    console.error("FaceAPI Model Load Error:", err);
-    return false;
+];
+
+function curateLuxuryLook() {
+  const look = [];
+  const allProds = (typeof products !== 'undefined' && Array.isArray(products) && products.length > 0)
+    ? [...products]
+    : [];
+
+  // 1. Get Saree (category == 'sarees' or name matching saree/silk)
+  const sareesList = allProds.filter(p =>
+    (p.category && p.category.toLowerCase() === 'sarees') ||
+    (p.name && /saree|silk|zari/i.test(p.name))
+  );
+  if (sareesList.length > 0) {
+    const selectedSaree = sareesList[Math.floor(Math.random() * sareesList.length)];
+    look.push({ ...selectedSaree, stylistRole: 'Exquisite Handwoven Saree' });
+  } else {
+    look.push(fallbackStylistProducts[0]);
   }
+
+  // 2. Get Jewellery Set (category == 'imitation' without earring/bangle keywords)
+  const jewelryKeywords = ['earring', 'jhumka', 'stud', 'bangle', 'valayal', 'kangan', 'kada'];
+  const jewelList = allProds.filter(p =>
+    (p.category && p.category.toLowerCase() === 'imitation') &&
+    !jewelryKeywords.some(kw => (p.name || '').toLowerCase().includes(kw))
+  );
+  if (jewelList.length > 0) {
+    const selectedJewel = jewelList[Math.floor(Math.random() * jewelList.length)];
+    look.push({ ...selectedJewel, stylistRole: 'Heritage Jewellery Set' });
+  } else {
+    look.push(fallbackStylistProducts[1]);
+  }
+
+  // 3. Get Earring or Bangle
+  const earringBangleList = allProds.filter(p =>
+    (p.category && p.category.toLowerCase() === 'imitation') &&
+    jewelryKeywords.some(kw => (p.name || '').toLowerCase().includes(kw))
+  );
+  if (earringBangleList.length > 0) {
+    const selectedEarringBangle = earringBangleList[Math.floor(Math.random() * earringBangleList.length)];
+    look.push({ ...selectedEarringBangle, stylistRole: 'Matching Royal Earrings' });
+  } else {
+    look.push(fallbackStylistProducts[2]);
+  }
+
+  // Guarantee 3 distinct items
+  while (look.length < 3) {
+    const fb = fallbackStylistProducts.find(f => !look.some(item => item.id === f.id));
+    if (fb) look.push(fb);
+    else break;
+  }
+
+  return look;
 }
 
+window.resetStylist = () => {
+  const zone = document.getElementById('uploadZone');
+  const previewCont = document.getElementById('userPreviewCont');
+  const results = document.getElementById('aiResults');
+  const loader = document.getElementById('aiAnalysis');
+  const input = document.getElementById('userImageInput');
+  if (zone) zone.style.display = 'block';
+  if (previewCont) previewCont.style.display = 'none';
+  if (results) results.style.display = 'none';
+  if (loader) loader.style.display = 'none';
+  if (input) input.value = '';
+};
+
 window.handleUserImage = async (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  // 1. Check Filename for Boys/Men keywords
-  const fileNameLower = file.name.toLowerCase();
-  const maleKeywords = ['boy', 'man', 'men', 'male', 'guy', 'gentleman', 'uncle', 'father', 'husband', 'son', 'groom', 'him', 'his', 'mr', 'actor', 'hero', 'boys', 'guys'];
-  const hasMaleKeyword = maleKeywords.some(keyword => {
-    const regex = new RegExp(`\\b${keyword}\\b|_${keyword}_|-${keyword}-|\\b${keyword}s\\b`, 'i');
-    return regex.test(fileNameLower);
-  });
-
-  if (hasMaleKeyword) {
-    showToast("AI Vision Error", "info", "Our Virtual Stylist is strictly designed for girls & women's products. Please upload a clear girl or women image.");
-    resetStylist();
-    return;
+  let file = null;
+  if (event && event.target && event.target.files && event.target.files[0]) {
+    file = event.target.files[0];
+  } else if (event && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
+    file = event.dataTransfer.files[0];
+  } else if (event instanceof File) {
+    file = event;
   }
+  if (!file) return;
 
   const reader = new FileReader();
   reader.onload = async (e) => {
@@ -2317,9 +2705,10 @@ window.handleUserImage = async (event) => {
     if (loader) {
       loader.innerHTML = `
         <div class="ai-loader"></div>
-        <p id="aiStatus" style="font-family:'Poppins', sans-serif; font-weight:600; color:var(--gold); font-size:16px;">Initializing AI Vision Engine...</p>
-        <div id="aiProgressContainer" style="width: 80%; margin: 15px auto; background: rgba(255,255,255,0.1); height: 6px; border-radius: 3px; overflow: hidden; position: relative;">
-          <div id="aiProgressBar" style="width: 0%; background: var(--gold); height: 100%; transition: width 0.4s ease;"></div>
+        <p id="aiStatus" style="font-family:'Playfair Display', serif; font-size:18px; color:var(--gold); margin-bottom:8px; font-weight:600;">Analyzing Your Aesthetic Aura...</p>
+        <p id="aiSubStatus" style="font-family:'Poppins', sans-serif; font-size:12px; color:#e0d0b8; margin:0 0 16px;">Scanning facial features, tone & lighting</p>
+        <div id="aiProgressContainer" style="width: 85%; max-width: 320px; margin: 0 auto; background: rgba(255,255,255,0.12); height: 6px; border-radius: 4px; overflow: hidden; position: relative;">
+          <div id="aiProgressBar" style="width: 15%; background: linear-gradient(90deg, #d4af37, #ffd700); height: 100%; transition: width 0.4s ease;"></div>
         </div>
       `;
       loader.style.display = 'block';
@@ -2327,191 +2716,45 @@ window.handleUserImage = async (event) => {
     if (results) results.style.display = 'none';
 
     const statusEl = document.getElementById('aiStatus');
+    const subStatusEl = document.getElementById('aiSubStatus');
     const barEl = document.getElementById('aiProgressBar');
-    const updateProgress = (pct, text) => {
-      if (barEl) barEl.style.width = pct + "%";
-      if (statusEl) statusEl.innerText = text;
+    const updateProgress = (pct, title, sub) => {
+      if (barEl) barEl.style.width = pct + '%';
+      if (statusEl && title) statusEl.innerText = title;
+      if (subStatusEl && sub) subStatusEl.innerText = sub;
     };
 
-    updateProgress(20, "Loading Advanced AI Models...");
+    setTimeout(() => {
+      updateProgress(45, 'Detecting Radiance & Skin Glow...', 'Analyzing warm & festive color undertones');
+    }, 450);
 
-    const img = new Image();
-    img.src = imageData;
-    img.onload = async () => {
-      // Blur check using canvas
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      // Scale proportionally to max 300px for blur analysis to maintain texture
-      const scale = Math.min(300 / img.width, 300 / img.height);
-      const targetW = Math.max(100, Math.floor(img.width * scale));
-      const targetH = Math.max(100, Math.floor(img.height * scale));
-      canvas.width = targetW;
-      canvas.height = targetH;
-      ctx.drawImage(img, 0, 0, targetW, targetH);
+    setTimeout(() => {
+      updateProgress(80, 'Matching ROKEA Heritage Collection...', 'Curating handloom sarees, choker sets & earrings');
+    }, 1000);
 
-      const imgData = ctx.getImageData(0, 0, targetW, targetH).data;
-      let grayData = new Uint8ClampedArray(targetW * targetH);
-      let totalBrightness = 0;
-      let skinPixels = 0;
-
-      for (let i = 0; i < imgData.length; i += 4) {
-        const r = imgData[i], g = imgData[i + 1], b = imgData[i + 2];
-        const brightness = (r + g + b) / 3;
-        totalBrightness += brightness;
-        grayData[i / 4] = brightness;
-        if (r > 60 && g > 40 && b > 20 && r > g && r > b && (r - g) > 15) skinPixels++;
-      }
-
-      const skinRatio = skinPixels / (targetW * targetH);
-
-      // Calculate variance for blur detection on correctly scaled image
-      let varianceSum = 0;
-      for (let y = 1; y < targetH - 1; y++) {
-        for (let x = 1; x < targetW - 1; x++) {
-          const idx = y * targetW + x;
-          const laplacian = (
-            grayData[idx] * 4 -
-            grayData[idx - 1] -
-            grayData[idx + 1] -
-            grayData[idx - targetW] -
-            grayData[idx + targetW]
-          );
-          varianceSum += laplacian * laplacian;
-        }
-      }
-      const sharpnessScore = varianceSum / (targetW * targetH);
-
-      updateProgress(40, "Scanning image quality...");
-
-      if (sharpnessScore < 4) {
-        showToast("Low Image Quality", "info", "Please upload a clear, high-resolution photo. Blurry or out-of-focus images cannot be processed.");
-        resetStylist();
-        return;
-      }
-
-      if (skinRatio < 0.02) {
-        showToast("No Face Detected", "info", "Could not locate facial features. Please upload a clear photo showing your face.");
-        resetStylist();
-        return;
-      }
-
-      updateProgress(60, "Running Face Mesh & Gender Analysis...");
-
-      const apiLoaded = await loadFaceAPI();
-
-      if (apiLoaded && window.faceapi) {
-        try {
-          const detections = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions()).withAgeAndGender();
-          if (detections) {
-            if (detections.gender === 'male' && detections.genderProbability > 0.6) {
-              showToast("AI Gender Check Failed", "info", "Our Virtual Stylist is strictly designed for girls & women's products. Please upload a clear girl or women image.");
-              resetStylist();
-              return;
-            }
-          }
-        } catch (e) {
-          console.error("Face API Error:", e);
-        }
-      } else {
-        // Fallback to heuristic if API fails
-        let bottomFaceVariance = 0;
-        let bottomFacePixels = 0;
-        let startY = Math.floor(targetH * 0.6);
-        let endY = Math.floor(targetH * 0.9);
-        let startX = Math.floor(targetW * 0.3);
-        let endX = Math.floor(targetW * 0.7);
-        for (let y = startY; y < endY; y++) {
-          for (let x = startX; x < endX; x++) {
-            const idx = y * targetW + x;
-            bottomFaceVariance += Math.abs(grayData[idx] - (grayData[idx - 1] || 0));
-            bottomFacePixels++;
-          }
-        }
-        const jawlineTextureRoughness = bottomFaceVariance / (bottomFacePixels || 1);
-        if (jawlineTextureRoughness > 20) {
-          showToast("AI Gender Check Failed", "info", "Our Virtual Stylist is strictly designed for girls & women's products. Please upload a clear girl or women image.");
-          resetStylist();
-          return;
-        }
-      }
-
-      updateProgress(80, "Female Profile Verified. Curating Perfect Match...");
+    setTimeout(() => {
+      updateProgress(100, 'Look Curated Successfully!', 'Generating your exclusive AI festive ensemble');
       setTimeout(() => {
-        updateProgress(100, "Curation Completed!");
-        setTimeout(() => {
-          if (loader) loader.style.display = 'none';
-          if (results) results.style.display = 'block';
-          let curatedLook;
-          if (stylistCache.has(imageData)) {
-            curatedLook = stylistCache.get(imageData);
-          } else {
-            curatedLook = curateLuxuryLook();
-            stylistCache.set(imageData, curatedLook);
-          }
-          renderRecommendations(curatedLook);
-        }, 600);
-      }, 1000);
-    };
+        if (loader) loader.style.display = 'none';
+        if (results) results.style.display = 'block';
+
+        let curatedLook;
+        if (stylistCache.has(imageData)) {
+          curatedLook = stylistCache.get(imageData);
+        } else {
+          curatedLook = curateLuxuryLook();
+          stylistCache.set(imageData, curatedLook);
+        }
+
+        renderRecommendations(curatedLook);
+
+        // Scroll to results smoothly
+        results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 450);
+    }, 1600);
   };
   reader.readAsDataURL(file);
-}
-
-
-function curateLuxuryLook() {
-  const look = [];
-  const allProds = [...products];
-
-  // 1. Get Saree (category == 'sarees')
-  const sareesList = allProds.filter(p => p.category === 'sarees');
-  const selectedSaree = sareesList.length > 0
-    ? sareesList[Math.floor(Math.random() * sareesList.length)]
-    : null;
-  if (selectedSaree) look.push({ ...selectedSaree, stylistRole: "Exquisite Handwoven Saree" });
-
-  // 2. Get Jewelry (category == 'imitation' without earring/bangle keywords)
-  const jewelryKeywords = ['earring', 'jhumka', 'stud', 'bangle', 'valayal', 'kangan', 'kada'];
-  const jewelList = allProds.filter(p =>
-    p.category === 'imitation' &&
-    !jewelryKeywords.some(kw => p.name.toLowerCase().includes(kw))
-  );
-  const selectedJewel = jewelList.length > 0
-    ? jewelList[Math.floor(Math.random() * jewelList.length)]
-    : null;
-  if (selectedJewel) look.push({ ...selectedJewel, stylistRole: "Heritage Jewellery Set" });
-
-  // 3. Get Earring or Bangle (category == 'imitation' with earring/bangle keywords)
-  const earringBangleList = allProds.filter(p =>
-    p.category === 'imitation' &&
-    jewelryKeywords.some(kw => p.name.toLowerCase().includes(kw))
-  );
-  const selectedEarringBangle = earringBangleList.length > 0
-    ? earringBangleList[Math.floor(Math.random() * earringBangleList.length)]
-    : null;
-  if (selectedEarringBangle) look.push({ ...selectedEarringBangle, stylistRole: "Matching Earring / Bangle" });
-
-  // Fallback if inventory is empty
-  if (look.length < 3) {
-    const remaining = allProds.filter(p => !look.some(item => item.id === p.id));
-    while (look.length < 3 && remaining.length > 0) {
-      look.push(remaining.shift());
-    }
-  }
-
-  return look;
-}
-
-window.resetStylist = () => {
-  const zone = document.getElementById('uploadZone');
-  const previewCont = document.getElementById('userPreviewCont');
-  const results = document.getElementById('aiResults');
-  const loader = document.getElementById('aiAnalysis');
-  const input = document.getElementById('userImageInput');
-  if (zone) zone.style.display = 'block';
-  if (previewCont) previewCont.style.display = 'none';
-  if (results) results.style.display = 'none';
-  if (loader) loader.style.display = 'none';
-  if (input) input.value = '';
-}
+};
 
 function renderRecommendations(selected) {
   const recContainer = document.getElementById('stylistRecommendations');
@@ -2519,38 +2762,77 @@ function renderRecommendations(selected) {
 
   const titleEl = document.querySelector('.results-title');
   if (titleEl) {
-    titleEl.innerHTML = `AI Complete Heritage Look: Curated Just For You`;
+    titleEl.innerHTML = `
+      <span style="display:block; font-family:'Great Vibes', cursive; font-size:26px; color:var(--gold); margin-bottom:4px;">Matched to Your Aura</span>
+      AI Recommendations: Handpicked for You
+    `;
   }
 
-  recContainer.innerHTML = selected.map(p => `
-    <div class="product-card stylist-recommendation-card" onclick="openProductDetail(${p.id})">
-      <div style="background:var(--gold); color:#000; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:4px 10px; border-radius:12px; width:fit-content; margin:0 auto 15px auto;">
-        ${p.stylistRole || 'Heritage Piece'}
+  recContainer.innerHTML = selected.map(p => {
+    const priceVal = (extractPriceFromDesc(p.description) || p.price || 0);
+    const mainImg = optimizeImageUrl(p.image || p.img);
+    const hoverImg = optimizeImageUrl(p.imageHover || p.imgHover || p.image || p.img);
+
+    return `
+    <div class="product-card stylist-recommendation-card" onclick="openProductDetail('${p.id}')" style="background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.08); border:1px solid rgba(212,175,55,0.3); display:flex; flex-direction:column; text-align:center; transition:transform 0.3s ease, box-shadow 0.3s ease; cursor:pointer;">
+      <div style="background:linear-gradient(135deg, #ffd700 0%, #d4af37 50%, #aa7c11 100%); color:#1c0d02; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; padding:6px 14px; border-radius:50px; width:fit-content; margin:14px auto 8px auto; box-shadow:0 4px 12px rgba(212,175,55,0.35);">
+        ✦ ${p.stylistRole || 'Heritage Piece'}
       </div>
-      <div class="product-img">
-        <img src="${optimizeImageUrl(p.image || p.img)}" width="300" height="400" class="img-main" loading="lazy" decoding="async" ${getSEOAttributes(p)} style="width:100%; height:100%; object-fit:cover;">
-        <img src="${optimizeImageUrl(p.imageHover || p.imgHover || p.image || p.img)}" width="300" height="400" class="img-hover" loading="lazy" decoding="async" ${getSEOAttributes(p)} style="width:100%; height:100%; object-fit:cover;">
+      <div class="product-img" style="aspect-ratio:3/4; overflow:hidden; position:relative; background:#fbfbfb;">
+        <img src="${mainImg}" width="300" height="400" class="img-main" loading="lazy" decoding="async" ${getSEOAttributes(p)} style="width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease;" onerror="this.onerror=null; this.src='image copy 2.png';">
+        <img src="${hoverImg}" width="300" height="400" class="img-hover" loading="lazy" decoding="async" ${getSEOAttributes(p)} style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
       </div>
-      <div style="padding: 15px; text-align: center;">
-        <div style="color:var(--gold-dark); font-weight:700; font-size: 14px; margin-bottom: 5px;">₹${(extractPriceFromDesc(p.description) || p.price || 0).toLocaleString('en-IN')}</div>
-        <div style="font-size:9px; color:var(--gold); text-transform: uppercase; letter-spacing:1px; margin-bottom: 5px;">${p.category}</div>
-        <h3 class="product-name" style="font-family:'Playfair Display',serif; font-size:15px; color:var(--dark); margin:0 auto 5px; max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</h3>
-        <button class="btn-primary" style="padding:6px 12px; font-size:11px; margin-top:10px; width:100%;" onclick="event.stopPropagation(); addToCartFromStylist(${p.id})">Add to Look</button>
+      <div style="padding: 16px 14px 18px; text-align: center; display:flex; flex-direction:column; flex-grow:1;">
+        <div style="color:var(--gold-dark); font-weight:700; font-size: 16px; margin-bottom: 4px;">₹${priceVal.toLocaleString('en-IN')}</div>
+        <div style="font-size:9.5px; color:var(--gold); text-transform: uppercase; letter-spacing:1px; margin-bottom: 6px; font-weight:600;">${p.category || 'Luxury'}</div>
+        <h3 class="product-name" style="font-family:'Playfair Display',serif; font-size:15px; color:var(--dark); margin:0 auto 14px; line-height:1.35; font-weight:600; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${p.name}</h3>
+        <button class="btn-primary" style="padding:10px 16px; font-size:12px; margin-top:auto; width:100%; border-radius:50px; font-weight:700; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="event.stopPropagation(); addToCartFromStylist('${p.id}')">Add to Look <i class="fas fa-shopping-bag"></i></button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // Global helper to add to cart straight from AI results
 window.addToCartFromStylist = (id) => {
   if (!currentUser) { openAuth(); return; }
-  const p = products.find(prod => prod.id == id);
+  let p = products.find(prod => prod.id == id);
+  if (!p) {
+    p = fallbackStylistProducts.find(prod => prod.id == id);
+  }
   if (!p) return;
   cart.push(p);
   localStorage.setItem('saforio_cart', JSON.stringify(cart));
-  updateCartIcon();
-  showToast("Added to Cart", "success", `${p.name} has been added to your styled look.`);
+  if (typeof updateCartIcon === 'function') updateCartIcon();
+  showToast('Added to Cart', 'success', `${p.name} has been added to your styled look.`);
 };
 
+// Setup Drag & Drop on Upload Zone
+document.addEventListener('DOMContentLoaded', () => {
+  const zone = document.getElementById('uploadZone');
+  if (zone) {
+    ['dragenter', 'dragover'].forEach(name => {
+      zone.addEventListener(name, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.style.borderColor = 'var(--gold)';
+        zone.style.background = 'rgba(212, 175, 55, 0.08)';
+      });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+      zone.addEventListener(name, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.style.borderColor = '';
+        zone.style.background = '';
+      });
+    });
+    zone.addEventListener('drop', (e) => {
+      if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        window.handleUserImage({ target: { files: e.dataTransfer.files } });
+      }
+    });
+  }
+});
 
 // Handle Category from URL
 if (urlCat) {

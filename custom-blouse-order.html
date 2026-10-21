@@ -308,7 +308,7 @@
               <i class="fas fa-eye pass-toggle" onclick="togglePassVisibility('loginPass', this)"></i>
             </div>
             <div class="forgot-pass-wrapper">
-              <a href="javascript:void(0)" onclick="alert('Password reset link sent to your email.')" class="forgot-pass-link">Forgot Password?</a>
+              <a href="javascript:void(0)" onclick="openForgotPassword()" class="forgot-pass-link">Forgot Password?</a>
             </div>
           </div>
 
@@ -368,6 +368,34 @@
           <button class="btn-primary pill-btn" onclick="handleRegister()">SIGN UP <i class="fas fa-arrow-right"></i></button>
 
           <p class="auth-footer-text">Already have an account? <a href="javascript:void(0)" onclick="toggleAuth(true)" class="auth-switch-link">Login</a></p>
+        </div>
+        <!-- Forgot Password Form -->
+        <div id="forgotView" style="display:none">
+          <div class="auth-top-ornament">🪷</div>
+          <span class="section-label">ACCOUNT RECOVERY</span>
+          <p class="auth-subtitle">Recover your festive journey</p>
+          <h3 class="auth-heading">Reset Password</h3>
+          <div class="auth-ornamental-divider">
+            <span class="line"></span>
+            <span class="symbol">🪷</span>
+            <span class="line"></span>
+          </div>
+
+          <p class="auth-reset-desc" style="font-size: 11px; color: #ffecb3; margin-bottom: 12px; line-height: 1.4; text-shadow: 0 1px 4px rgba(0,0,0,0.8);">
+            Enter your registered email address below. We will send a secure link to reset your password.
+          </p>
+
+          <div class="form-group">
+            <label>REGISTERED EMAIL</label>
+            <div class="input-with-icon">
+              <i class="fas fa-envelope input-icon"></i>
+              <input type="email" id="forgotEmail" placeholder="your@email.com">
+            </div>
+          </div>
+
+          <button class="btn-primary pill-btn" id="forgotSubmitBtn" onclick="handleForgotPassword()">SEND RESET LINK <i class="fas fa-paper-plane"></i></button>
+
+          <p class="auth-footer-text">Remember your password? <a href="javascript:void(0)" onclick="toggleAuth(true)" class="auth-switch-link">Back to Login</a></p>
         </div>
       </div>
     </div>
