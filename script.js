@@ -87,8 +87,21 @@ window.addEventListener('error', function (e) {
   }
 }, true);
 
+function sanitizeWishlist(list) {
+  if (!Array.isArray(list)) return [];
+  const seen = new Set();
+  return list.filter(item => {
+    if (!item || item.id === undefined || item.id === null) return false;
+    const idStr = String(item.id);
+    if (seen.has(idStr)) return false;
+    seen.add(idStr);
+    return true;
+  });
+}
+
 let cart = JSON.parse(localStorage.getItem('saforio_cart')) || [];
-let wishlist = JSON.parse(localStorage.getItem('saforio_wishlist')) || [];
+let wishlist = sanitizeWishlist(JSON.parse(localStorage.getItem('saforio_wishlist')) || []);
+localStorage.setItem('saforio_wishlist', JSON.stringify(wishlist));
 let users = JSON.parse(localStorage.getItem('saforio_users')) || [];
 let currentCategory = 'sarees';
 let currentSort = 'default';
@@ -351,25 +364,28 @@ function toggleWishlist() {
 
 function addToWishlist(productId) {
   if (!currentUser) { openAuth(); return; }
-  const index = wishlist.findIndex(p => p.id == productId);
-  const p = products.find(prod => prod.id == productId);
 
-  if (index === -1 && p) {
-    wishlist.push(p);
-    showToast("Added to Wishlist!", "success", p.name);
-  } else if (p) {
-    wishlist.splice(index, 1);
-    showToast("Removed from Wishlist", "info", p.name);
-  }
+  // Clean duplicates if any exist in array
+  wishlist = sanitizeWishlist(wishlist);
+
+  const p = products.find(prod => prod.id == productId);
+  if (!p) return;
+
+  const index = wishlist.findIndex(item => item.id == productId);
 
   // Find the element that was clicked to animate it
-  const btn = event?.currentTarget;
-  if (btn) {
-    btn.classList.add('wish-animate');
-    setTimeout(() => btn.classList.remove('wish-animate'), 500);
+  const btn = (typeof event !== 'undefined' && event?.currentTarget) ? event.currentTarget : null;
 
-    // Sparkle effect
-    if (index === -1) {
+  if (index === -1) {
+    // Product is NOT in wishlist -> Add it EXACTLY ONCE
+    wishlist.push(p);
+    showToast("Added to Wishlist!", "success", p.name);
+
+    if (btn) {
+      btn.classList.add('wish-animate');
+      setTimeout(() => btn.classList.remove('wish-animate'), 500);
+
+      // Sparkle effect
       const sparkleCont = document.createElement('div');
       sparkleCont.className = 'sparkle-container';
       sparkleCont.style.position = 'absolute';
@@ -388,10 +404,8 @@ function addToWishlist(productId) {
         sparkleCont.appendChild(sparkle);
       }
       setTimeout(() => sparkleCont.remove(), 700);
-    }
 
-    // Instagram-style big heart pop
-    if (index === -1) { // Only on "Add"
+      // Instagram-style big heart pop
       const productCard = btn.closest('.product-card');
       const imgCont = productCard?.querySelector('.product-img');
       if (imgCont) {
@@ -403,24 +417,28 @@ function addToWishlist(productId) {
         setTimeout(() => heartPop.remove(), 900);
       }
     }
-
-  }
-
-  if (index > -1) {
-    wishlist.splice(index, 1);
   } else {
-    const p = products.find(prod => prod.id == productId);
-    if (p) wishlist.push(p);
+    // Product IS already in wishlist -> Remove it (single or any duplicate instances)
+    wishlist = wishlist.filter(item => item.id != productId);
+    showToast("Removed from Wishlist", "info", p.name);
+
+    if (btn) {
+      btn.classList.add('wish-animate');
+      setTimeout(() => btn.classList.remove('wish-animate'), 500);
+    }
   }
+
   localStorage.setItem('saforio_wishlist', JSON.stringify(wishlist));
   updateWishlistIcon();
   renderGrid();
+  if (document.getElementById('wishlistModal') && document.getElementById('wishlistModal').style.display === 'flex') {
+    renderWishlist();
+  }
 }
-
-
 
 function removeFromWishlist(index) {
   wishlist.splice(index, 1);
+  wishlist = sanitizeWishlist(wishlist);
   localStorage.setItem('saforio_wishlist', JSON.stringify(wishlist));
   updateWishlistIcon();
   renderWishlist();
@@ -692,10 +710,16 @@ window.handleForgotPassword = () => {
   firebase.auth().sendPasswordResetEmail(email)
     .then(() => {
       const successHtml = `
-        <div style="background: rgba(46, 125, 50, 0.25); border: 1px solid #4caf50; color: #c8e6c9; padding: 12px; border-radius: 8px; font-size: 12px; line-height: 1.5;">
-          <strong style="color: #a5d6a7; font-size: 13px;">✓ Password Reset Email Sent!</strong><br>
-          A secure reset link was dispatched to <strong>${email}</strong>.<br>
-          <span style="color: #ffd54f; font-weight: 600; display: block; margin-top: 6px;">⚠️ IMPORTANT: Please check your SPAM / JUNK folder if not in your primary inbox!</span>
+        <div style="background: rgba(46, 125, 50, 0.25); border: 1.5px solid #4caf50; color: #c8e6c9; padding: 14px; border-radius: 8px; font-size: 12.5px; line-height: 1.6;">
+          <strong style="color: #a5d6a7; font-size: 14px;">✓ Password Reset Email Sent!</strong><br>
+          We have sent a reset link to: <strong>${email}</strong><br><br>
+          <div style="background: rgba(255, 193, 7, 0.2); border: 1px solid #ffd54f; color: #fff9c4; padding: 10px; border-radius: 6px;">
+            ⚠️ <strong>MAIL VARALAIYA?</strong><br>
+            Gmail-la <strong>Spam / Junk</strong> folder kulla check pannunga! Firebase default server moolam varuvathala, 99% reset mail <strong>Spam folder</strong>-ku thaan pogum.
+          </div>
+          <div style="margin-top: 10px; text-align: center;">
+            <a href="https://mail.google.com/mail/u/0/#spam" target="_blank" style="color: #ffd700; font-weight: 700; text-decoration: underline;">Open Gmail Spam Folder &rarr;</a>
+          </div>
         </div>
       `;
       if (statusMsg) {
@@ -703,16 +727,16 @@ window.handleForgotPassword = () => {
         statusMsg.style.display = 'block';
       }
       if (submitBtn) {
-        submitBtn.innerHTML = 'Reset Link Sent! Check Email ✓';
+        submitBtn.innerHTML = 'Link Sent! Check Spam Folder ✓';
         submitBtn.style.background = '#2e7d32';
       }
-      alert("Password reset link sent to " + email + "!\n\n⚠️ IMPORTANT: If you do not see it in your Inbox, please check your SPAM / JUNK folder.");
+      alert("Password reset link sent to " + email + "!\n\n⚠️ IMPORTANT: Mail inbox-la illana kandippa SPAM / JUNK folder kulla check pannunga!");
     })
     .catch((error) => {
       console.error("Firebase sendPasswordResetEmail error:", error);
       let errMsg = error.message;
       if (error.code === 'auth/user-not-found') {
-        errMsg = "No account found with this email. Please check spelling or click Register to create an account.";
+        errMsg = "Intha email-la account illa. Please check spelling or click Register to create a new account.";
       } else if (error.code === 'auth/invalid-email') {
         errMsg = "The email address is not properly formatted.";
       } else if (error.code === 'auth/too-many-requests') {
@@ -734,7 +758,7 @@ window.handleForgotPassword = () => {
         setTimeout(() => {
           submitBtn.innerHTML = originalBtnHtml;
           submitBtn.style.background = '';
-        }, 6000);
+        }, 8000);
       }
     });
 };
@@ -2028,6 +2052,7 @@ window.closeFullStory = () => { if (storyModal) storyModal.style.display = 'none
 window.onclick = (e) => {
   if (e.target === adminModal) return;
   if (e.target === authModal) closeAuth();
+  if (e.target === document.getElementById('appointmentModal')) closeAppointmentModal();
   if (e.target === storyModal) closeFullStory();
   if (e.target === document.getElementById('leadModal')) closeLeadModal();
   if (e.target === document.getElementById('productDetailModal')) closeProductDetail();
@@ -2807,13 +2832,14 @@ function renderRecommendations(selected) {
     const mainImg = optimizeImageUrl(p.image || p.img || 'https://i.postimg.cc/sXxwCWBs/DSC01979.jpg');
     const productUrl = getProductLink ? getProductLink(p) : 'product-details.html?id=' + p.id;
 
+    // Notice: Using stylist-recommendation-card WITHOUT product-card to completely disable hover image
     return `
-    <div class="product-card stylist-recommendation-card" onclick="window.location.href='${productUrl}'" style="background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.08); border:1px solid rgba(212,175,55,0.3); display:flex; flex-direction:column; text-align:center; transition:transform 0.3s ease, box-shadow 0.3s ease; cursor:pointer;">
+    <div class="stylist-recommendation-card" onclick="window.location.href='${productUrl}'">
       <div style="background:linear-gradient(135deg, #ffd700 0%, #d4af37 50%, #aa7c11 100%); color:#1c0d02; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; padding:6px 14px; border-radius:50px; width:fit-content; margin:14px auto 8px auto; box-shadow:0 4px 12px rgba(212,175,55,0.35);">
         ✦ ${p.stylistRole || 'Heritage Piece'}
       </div>
-      <div class="product-img" style="aspect-ratio:3/4; overflow:hidden; position:relative; background:#fbfbfb;">
-        <img src="${mainImg}" class="img-main" loading="eager" alt="${p.name}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease;" onerror="this.onerror=null; this.src='https://i.postimg.cc/sXxwCWBs/DSC01979.jpg';">
+      <div class="product-img">
+        <img src="${mainImg}" class="img-main" loading="eager" alt="${p.name}" onerror="this.onerror=null; this.src='https://i.postimg.cc/sXxwCWBs/DSC01979.jpg';">
       </div>
       <div style="padding: 16px 14px 18px; text-align: center; display:flex; flex-direction:column; flex-grow:1;">
         <div style="color:var(--gold-dark); font-weight:700; font-size: 17px; margin-bottom: 4px;">₹${priceVal.toLocaleString('en-IN')}</div>
@@ -4038,3 +4064,250 @@ if (document.readyState === 'interactive' || document.readyState === 'complete')
   initHeroLetterReveal();
   initCategoryScrollReveal();
 }
+
+
+// ========================================================
+// APPOINTMENT & CONTACT FORM HANDLERS
+// ========================================================
+window.openAppointmentModal = () => {
+  let modal = document.getElementById('appointmentModal');
+  if (!modal) {
+    // If not found in DOM, dynamically inject it so it works on any page
+    const modalWrapper = document.createElement('div');
+    modalWrapper.id = 'appointmentModal';
+    modalWrapper.className = 'modal';
+    modalWrapper.innerHTML = `
+      <div class="modal-content appointment-modal-content">
+        <span class="modal-close" onclick="closeAppointmentModal()">×</span>
+        <div class="appointment-modal-header">
+          <div class="auth-top-ornament">🪷</div>
+          <span class="section-label">ROKEA CONCIERGE & STYLING</span>
+          <h2 class="appointment-heading">Book an <em>Appointment</em></h2>
+          <p class="appointment-subtitle">Schedule a personalized bridal styling consultation, custom blouse fitting, or boutique visit in Coimbatore.</p>
+          <div class="auth-ornamental-divider small">
+            <span class="line"></span>
+            <span class="symbol">🪷</span>
+            <span class="line"></span>
+          </div>
+        </div>
+
+        <form id="appointmentForm" onsubmit="handleAppointmentSubmit(event)" class="appointment-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label>YOUR NAME <span style="color:#d4af37;">*</span></label>
+              <div class="input-with-icon">
+                <i class="fas fa-user input-icon"></i>
+                <input type="text" id="appoName" required placeholder="Ex: Ananya Sharma">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>PHONE / WHATSAPP <span style="color:#d4af37;">*</span></label>
+              <div class="input-with-icon">
+                <i class="fas fa-phone input-icon"></i>
+                <input type="tel" id="appoPhone" required placeholder="Ex: 9876543210">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>EMAIL ADDRESS</label>
+              <div class="input-with-icon">
+                <i class="fas fa-envelope input-icon"></i>
+                <input type="email" id="appoEmail" placeholder="your@email.com">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>SERVICE / INTEREST <span style="color:#d4af37;">*</span></label>
+              <div class="input-with-icon select-wrapper">
+                <i class="fas fa-sparkles input-icon"></i>
+                <select id="appoService" required>
+                  <option value="Bridal Saree Consultation">Bridal Saree Styling & Draping</option>
+                  <option value="Custom Blouse Designing">Custom Blouse Designing & Measurement</option>
+                  <option value="Heritage Jewellery Styling">Heritage & Temple Jewellery Styling</option>
+                  <option value="Boutique Personal Visit">Boutique Visit (Coimbatore)</option>
+                  <option value="Online Video Consultation">Online Video Consultation</option>
+                  <option value="General Enquiry">General Enquiry / Support</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>PREFERRED DATE</label>
+              <div class="input-with-icon">
+                <i class="fas fa-calendar-alt input-icon"></i>
+                <input type="date" id="appoDate">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>PREFERRED TIME</label>
+              <div class="input-with-icon select-wrapper">
+                <i class="fas fa-clock input-icon"></i>
+                <select id="appoTime">
+                  <option value="Morning (10:00 AM - 1:00 PM)">Morning (10:00 AM - 1:00 PM)</option>
+                  <option value="Afternoon (1:00 PM - 5:00 PM)" selected>Afternoon (1:00 PM - 5:00 PM)</option>
+                  <option value="Evening (5:00 PM - 8:00 PM)">Evening (5:00 PM - 8:00 PM)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>MESSAGE / SPECIAL REQUIREMENTS</label>
+            <div class="input-with-icon">
+              <textarea id="appoNotes" rows="2" placeholder="Tell us about your occasion, preferred colors, or design requirements..." style="width:100%; border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:10px 12px; font-family:inherit; font-size:13px; outline:none; background:#fff; resize:vertical;"></textarea>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary pill-btn" id="appoSubmitBtn" style="width:100%; margin-top:10px; padding:12px; font-weight:700; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:8px;">
+            CONFIRM APPOINTMENT <i class="fas fa-arrow-right"></i>
+          </button>
+
+          <div class="appointment-whatsapp-box" style="margin-top:16px; padding:12px 14px; background:rgba(37,211,102,0.1); border:1px solid rgba(37,211,102,0.35); border-radius:10px; text-align:center;">
+            <span style="font-size:12px; color:#2e7d32; font-weight:600; display:block; margin-bottom:6px;">Prefer Instant Booking via WhatsApp?</span>
+            <a href="javascript:void(0)" onclick="bookViaWhatsAppDirect()" style="display:inline-flex; align-items:center; gap:8px; background:#25D366; color:#fff; font-weight:700; font-size:12.5px; padding:8px 20px; border-radius:50px; text-decoration:none; box-shadow:0 4px 12px rgba(37,211,102,0.3);">
+              <i class="fab fa-whatsapp" style="font-size:16px;"></i> Book Instantly on WhatsApp
+            </a>
+          </div>
+        </form>
+      </div>`;
+    document.body.appendChild(modalWrapper);
+    modal = modalWrapper;
+  }
+
+  // Pre-fill user data if logged in
+  if (currentUser) {
+    const nameInp = document.getElementById('appoName');
+    const emailInp = document.getElementById('appoEmail');
+    const phoneInp = document.getElementById('appoPhone');
+    if (nameInp && !nameInp.value) nameInp.value = currentUser.displayName || '';
+    if (emailInp && !emailInp.value) emailInp.value = currentUser.email || '';
+    if (phoneInp && !phoneInp.value && currentUser.phoneNumber) phoneInp.value = currentUser.phoneNumber;
+  }
+
+  // Set min date to today
+  const dateInput = document.getElementById('appoDate');
+  if (dateInput) {
+    const today = new Date().toISOString().split('T')[0];
+    dateInput.min = today;
+    if (!dateInput.value) dateInput.value = today;
+  }
+
+  modal.style.display = 'flex';
+  document.body.classList.add('modal-open');
+};
+
+window.closeAppointmentModal = () => {
+  const modal = document.getElementById('appointmentModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+  }
+};
+
+window.handleAppointmentSubmit = (e) => {
+  if (e && e.preventDefault) e.preventDefault();
+
+  const name = document.getElementById('appoName') ? document.getElementById('appoName').value.trim() : '';
+  const phone = document.getElementById('appoPhone') ? document.getElementById('appoPhone').value.trim() : '';
+  const email = document.getElementById('appoEmail') ? document.getElementById('appoEmail').value.trim() : '';
+  const service = document.getElementById('appoService') ? document.getElementById('appoService').value : 'Bridal Saree Consultation';
+  const date = document.getElementById('appoDate') ? document.getElementById('appoDate').value : '';
+  const time = document.getElementById('appoTime') ? document.getElementById('appoTime').value : '';
+  const notes = document.getElementById('appoNotes') ? document.getElementById('appoNotes').value.trim() : '';
+
+  if (!name) {
+    alert("Please enter your name.");
+    return;
+  }
+  if (!phone || phone.length < 7) {
+    alert("Please enter a valid phone or WhatsApp number.");
+    return;
+  }
+
+  const submitBtn = document.getElementById('appoSubmitBtn');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = 'Booking Appointment... <i class="fas fa-spinner fa-spin"></i>';
+  }
+
+  const appoData = {
+    name,
+    phone,
+    email,
+    service,
+    date,
+    time,
+    notes,
+    type: 'Appointment',
+    source: 'Website Book Appointment',
+    createdAt: new Date().toISOString()
+  };
+
+  // 1. Store in localStorage
+  try {
+    const localAppos = JSON.parse(localStorage.getItem('saforio_appointments')) || [];
+    localAppos.push(appoData);
+    localStorage.setItem('saforio_appointments', JSON.stringify(localAppos));
+  } catch (err) {
+    console.error("Local storage error:", err);
+  }
+
+  // 2. Store in Firestore (both appointments and leads collection so admin views see it!)
+  if (window.db) {
+    db.collection("appointments").add(appoData)
+      .then(() => console.log("Appointment saved to Firestore"))
+      .catch(err => console.error("Firestore appointment error:", err));
+
+    db.collection("leads").add({
+      name: name,
+      phone: phone,
+      email: email,
+      interest: service + (date ? ' [' + date + ' ' + time + ']' : ''),
+      notes: notes,
+      date: new Date().toISOString()
+    }).catch(err => console.error("Firestore lead error:", err));
+  }
+
+  // 3. Trigger festive celebration fireworks if available
+  if (typeof window.triggerPattasuFireworks === 'function') {
+    window.triggerPattasuFireworks(4000);
+  }
+
+  alert("Thank you, " + name + "! Your appointment for " + service + " has been booked.\n\nOur master stylist will call you shortly to confirm your session.");
+
+  // Ask if they want instant WhatsApp confirmation
+  const sendToWa = confirm("Would you like to send this appointment to WhatsApp for instant confirmation with our designer?");
+  if (sendToWa) {
+    window.bookViaWhatsAppDirect();
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = 'CONFIRM APPOINTMENT <i class="fas fa-arrow-right"></i>';
+  }
+
+  window.closeAppointmentModal();
+};
+
+window.bookViaWhatsAppDirect = () => {
+  const name = document.getElementById('appoName') ? document.getElementById('appoName').value.trim() : '';
+  const phone = document.getElementById('appoPhone') ? document.getElementById('appoPhone').value.trim() : '';
+  const service = document.getElementById('appoService') ? document.getElementById('appoService').value : 'Bridal Saree & Jewellery Styling';
+  const date = document.getElementById('appoDate') ? document.getElementById('appoDate').value : '';
+  const time = document.getElementById('appoTime') ? document.getElementById('appoTime').value : '';
+  const notes = document.getElementById('appoNotes') ? document.getElementById('appoNotes').value.trim() : '';
+
+  let msg = "Hi ROKEA by RK, I would like to book an appointment with your master stylist:\n";
+  if (name) msg += "• Name: " + name + "\n";
+  if (phone) msg += "• Phone: " + phone + "\n";
+  if (service) msg += "• Service: " + service + "\n";
+  if (date) msg += "• Preferred Date: " + date + "\n";
+  if (time) msg += "• Preferred Time: " + time + "\n";
+  if (notes) msg += "• Notes: " + notes + "\n";
+
+  const waUrl = "https://wa.me/917010394051?text=" + encodeURIComponent(msg);
+  window.open(waUrl, '_blank');
+};
