@@ -592,7 +592,7 @@
               handpicked recommendations tailored specifically for you.</p>
           </div>
         </div>
-        <button class="btn-primary" style="margin-top: 40px;" onclick="location.href='/ai-stylist'">Try AI Stylist
+        <button class="btn-primary" style="margin-top: 40px;" onclick="location.href='ai-stylist.html'">Try AI Stylist
           Now</button>
       </div>
       <div class="about-visual ai-visual-wrapper">
@@ -1009,11 +1009,11 @@
     <span class="section-label">Stay Connected</span>
     <h2 class="section-title" style="color:#fff">Exclusive <em>Offers</em> Await</h2>
     <p class="newsletter-sub">Subscribe for new arrivals, bridal lookbooks &amp; member-only discounts</p>
-    <form class="nl-form" id="newsletterForm" onsubmit="handleNewsletterSubscribe(event)">
+    <form class="nl-form" id="newsletterForm" onsubmit="event.preventDefault(); return handleNewsletterSubscribe(event);">
       <input class="nl-input" id="newsletterEmail" type="email" placeholder="Enter your email address" aria-label="Enter your email address" required>
-      <button class="nl-btn" id="newsletterBtn" type="submit">Subscribe</button>
+      <button class="nl-btn" id="newsletterBtn" type="button" onclick="handleNewsletterSubscribe(event)">Subscribe</button>
     </form>
-    <div id="newsletterSuccess" style="display:none; color:#ffd700; font-family:'Poppins',sans-serif; font-size:13px; font-weight:600; margin-top:16px; text-shadow:0 2px 8px rgba(0,0,0,0.8);">
+    <div id="newsletterSuccess" style="display:none; color:#ffd700; font-family:'Poppins',sans-serif; font-size:13.5px; font-weight:600; margin-top:16px; background:rgba(0,0,0,0.6); padding:12px 20px; border-radius:8px; border:1px solid rgba(212,175,55,0.4); text-align:center;">
       ✦ Thank you for subscribing! Exclusive festive offers will be sent to your inbox.
     </div>
   </section>
@@ -1216,7 +1216,8 @@
             </div>
           </div>
 
-          <button class="btn-primary pill-btn" id="forgotSubmitBtn" onclick="handleForgotPassword()">SEND RESET LINK <i class="fas fa-paper-plane"></i></button>
+          <button class="btn-primary pill-btn" id="forgotSubmitBtn" type="button" onclick="handleForgotPassword()">SEND RESET LINK <i class="fas fa-paper-plane"></i></button>
+          <div id="forgotStatusMessage" style="display:none; margin-top:12px; text-align:left;"></div>
 
           <p class="auth-footer-text">Remember your password? <a href="javascript:void(0)" onclick="toggleAuth(true)" class="auth-switch-link">Back to Login</a></p>
         </div>

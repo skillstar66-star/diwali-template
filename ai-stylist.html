@@ -128,13 +128,18 @@
       </div>
 
       <div class="stylist-interface">
-        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('userImageInput').click()">
-          <input type="file" id="userImageInput" style="display:none" accept="image/*" onchange="handleUserImage(event)">
+        <input type="file" id="userImageInput" style="display:none" accept="image/*" onchange="handleUserImage(event)">
+        <div class="upload-zone" id="uploadZone" onclick="triggerStylistUpload()">
           <div class="upload-inner">
             <div class="upload-icon">✦</div>
             <p>Click or Drag to Upload Your Photo</p>
             <span>Supported: JPG, PNG, WEBP</span>
           </div>
+        </div>
+        <div style="text-align: center; margin-top: 15px;">
+          <button type="button" class="btn-outline" style="font-size: 12px; padding: 8px 22px; border-radius: 50px; cursor: pointer; border: 1px solid var(--gold); background: rgba(255,255,255,0.85); font-weight: 600;" onclick="trySampleLook()">
+            ✨ Try With Sample Photo
+          </button>
         </div>
 
         <div id="userPreviewCont" style="display:none; margin-bottom: 30px; position: relative; width: fit-content; margin-left: auto; margin-right: auto;">
@@ -322,7 +327,8 @@
             </div>
           </div>
 
-          <button class="btn-primary pill-btn" id="forgotSubmitBtn" onclick="handleForgotPassword()">SEND RESET LINK <i class="fas fa-paper-plane"></i></button>
+          <button class="btn-primary pill-btn" id="forgotSubmitBtn" type="button" onclick="handleForgotPassword()">SEND RESET LINK <i class="fas fa-paper-plane"></i></button>
+          <div id="forgotStatusMessage" style="display:none; margin-top:12px; text-align:left;"></div>
 
           <p class="auth-footer-text">Remember your password? <a href="javascript:void(0)" onclick="toggleAuth(true)" class="auth-switch-link">Back to Login</a></p>
         </div>

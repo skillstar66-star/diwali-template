@@ -13,6 +13,7 @@ let db = null;
 if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
   firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
+  window.db = db;
   if (typeof firebase.analytics === 'function') {
     firebase.analytics();
   }
@@ -653,33 +654,34 @@ window.handleForgotPassword = () => {
     email = forgotEmailInput.value.trim();
   } else if (loginEmailInput && loginEmailInput.value.trim()) {
     email = loginEmailInput.value.trim();
+    if (forgotEmailInput) forgotEmailInput.value = email;
   }
 
   if (!email) {
     email = prompt("Enter your registered email to receive a password reset link:");
     if (!email) return;
     email = email.trim();
+    if (forgotEmailInput) forgotEmailInput.value = email;
   }
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    if (typeof showToast === 'function') {
-      showToast("Invalid Email", "info", "Please enter a valid email address.");
-    } else {
-      alert("Please enter a valid email address.");
-    }
+    alert("Please enter a valid email address (e.g., yourname@gmail.com).");
+    if (forgotEmailInput) forgotEmailInput.focus();
     return;
   }
 
   const submitBtn = document.getElementById('forgotSubmitBtn');
-  const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+  const statusMsg = document.getElementById('forgotStatusMessage');
+  const originalBtnHtml = submitBtn ? submitBtn.innerHTML : 'SEND RESET LINK';
+
   if (submitBtn) {
     submitBtn.disabled = true;
     submitBtn.innerHTML = 'Sending Link... <i class="fas fa-spinner fa-spin"></i>';
   }
 
   if (!window.firebase || !firebase.auth) {
-    alert("Authentication service is currently unavailable. Please check your internet connection.");
+    alert("Authentication service is loading. Please check your internet connection and try again.");
     if (submitBtn) {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnHtml;
@@ -689,36 +691,50 @@ window.handleForgotPassword = () => {
 
   firebase.auth().sendPasswordResetEmail(email)
     .then(() => {
-      const msg = "A secure password reset link has been sent to " + email + ". Please check your inbox and spam folder.";
-      if (typeof showToast === 'function') {
-        showToast("Password Reset Sent", "success", msg);
-      } else {
-        alert(msg);
+      const successHtml = `
+        <div style="background: rgba(46, 125, 50, 0.25); border: 1px solid #4caf50; color: #c8e6c9; padding: 12px; border-radius: 8px; font-size: 12px; line-height: 1.5;">
+          <strong style="color: #a5d6a7; font-size: 13px;">✓ Password Reset Email Sent!</strong><br>
+          A secure reset link was dispatched to <strong>${email}</strong>.<br>
+          <span style="color: #ffd54f; font-weight: 600; display: block; margin-top: 6px;">⚠️ IMPORTANT: Please check your SPAM / JUNK folder if not in your primary inbox!</span>
+        </div>
+      `;
+      if (statusMsg) {
+        statusMsg.innerHTML = successHtml;
+        statusMsg.style.display = 'block';
       }
-      setTimeout(() => {
-        window.toggleAuth('login');
-      }, 2500);
+      if (submitBtn) {
+        submitBtn.innerHTML = 'Reset Link Sent! Check Email ✓';
+        submitBtn.style.background = '#2e7d32';
+      }
+      alert("Password reset link sent to " + email + "!\n\n⚠️ IMPORTANT: If you do not see it in your Inbox, please check your SPAM / JUNK folder.");
     })
     .catch((error) => {
       console.error("Firebase sendPasswordResetEmail error:", error);
       let errMsg = error.message;
       if (error.code === 'auth/user-not-found') {
-        errMsg = "No account found with this email. Please check the spelling or Register a new account.";
+        errMsg = "No account found with this email. Please check spelling or click Register to create an account.";
       } else if (error.code === 'auth/invalid-email') {
-        errMsg = "The email address is badly formatted.";
+        errMsg = "The email address is not properly formatted.";
       } else if (error.code === 'auth/too-many-requests') {
-        errMsg = "Too many reset attempts. Please try again after a few minutes.";
+        errMsg = "Too many reset attempts recently. Please wait a few minutes before trying again.";
       }
-      if (typeof showToast === 'function') {
-        showToast("Reset Failed", "info", errMsg);
-      } else {
-        alert(errMsg);
+      if (statusMsg) {
+        statusMsg.innerHTML = `
+          <div style="background: rgba(211, 47, 47, 0.25); border: 1px solid #f44336; color: #ffcdd2; padding: 12px; border-radius: 8px; font-size: 12px; line-height: 1.5;">
+            <strong style="color: #ef5350;">Notice:</strong> ${errMsg}
+          </div>
+        `;
+        statusMsg.style.display = 'block';
       }
+      alert(errMsg);
     })
     .finally(() => {
       if (submitBtn) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = originalBtnHtml;
+        setTimeout(() => {
+          submitBtn.innerHTML = originalBtnHtml;
+          submitBtn.style.background = '';
+        }, 6000);
       }
     });
 };
@@ -767,32 +783,35 @@ window.closeReelModal = () => {
 }
 
 window.handleRegister = () => {
-  const name = document.getElementById('regName').value;
-  const email = document.getElementById('regEmail').value;
-  const phone = document.getElementById('regPhone').value;
-  const pass = document.getElementById('regPass').value;
-  if (!name || !email || !pass) return alert('Fill all fields');
+  const name = (document.getElementById('regName').value || '').trim();
+  const email = (document.getElementById('regEmail').value || '').trim();
+  const phone = (document.getElementById('regPhone').value || '').trim();
+  const pass = (document.getElementById('regPass').value || '').trim();
+  if (!name || !email || !pass) return alert('Please fill in Full Name, Email, and Password.');
 
   firebase.auth().createUserWithEmailAndPassword(email, pass)
     .then((userCredential) => {
       const user = userCredential.user;
       const userData = { name, email, phone, date: new Date().toISOString() };
 
+      // Immediately log in user locally and update UI
+      currentUser = { uid: user.uid, name, email, phone };
+      localStorage.setItem('saforio_currentUser', JSON.stringify(currentUser));
+      updateUserUI();
+
       // Save extra details to Firestore
       if (db) {
         db.collection("users").doc(user.uid).set(userData)
-          .then(() => {
-            console.log("User profile saved to Firestore!");
-            alert('Account created successfully! Welcome to ROKEA.');
-            toggleAuth(true);
-          })
           .catch(err => console.error("Firestore user profile error:", err));
       }
+
+      alert('Account created successfully! Welcome to ROKEA by RK.');
+      closeAuth();
     })
     .catch((error) => {
-      alert(error.message);
+      alert("Registration failed: " + error.message);
     });
-}
+};
 
 window.handleAuth = () => {
   const email = document.getElementById('loginEmail').value;
@@ -2196,21 +2215,20 @@ window.handleLead = (e) => {
 
 // NEWSLETTER SUBSCRIPTION HANDLER
 window.handleNewsletterSubscribe = (e) => {
-  if (e) e.preventDefault();
+  if (e) {
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+  }
   const input = document.getElementById('newsletterEmail') || document.querySelector('.nl-input');
-  if (!input) return;
+  if (!input) return false;
 
-  const email = input.value.trim();
+  const email = (input.value || '').trim();
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   if (!email || !emailRegex.test(email)) {
-    if (typeof showToast === 'function') {
-      showToast("Invalid Email", "info", "Please enter a valid email address.");
-    } else {
-      alert("Please enter a valid email address.");
-    }
+    alert("Please enter a valid email address (e.g., yourname@gmail.com).");
     input.focus();
-    return;
+    return false;
   }
 
   const btn = document.getElementById('newsletterBtn') || document.querySelector('.nl-btn');
@@ -2238,10 +2256,11 @@ window.handleNewsletterSubscribe = (e) => {
   }
 
   // 2. Save to Firestore (both newsletter and leads collections)
-  if (window.db) {
+  const activeDb = window.db || (typeof db !== 'undefined' ? db : null);
+  if (activeDb) {
     try {
-      db.collection("newsletter").add(subData).catch(e => console.warn("Firestore newsletter write error:", e));
-      db.collection("leads").add({
+      activeDb.collection("newsletter").add(subData).catch(e => console.warn("Firestore newsletter write error:", e));
+      activeDb.collection("leads").add({
         name: email.split('@')[0],
         email: email,
         phone: 'Newsletter',
@@ -2258,7 +2277,7 @@ window.handleNewsletterSubscribe = (e) => {
     window.triggerPattasuFireworks(4000);
   }
 
-  // 4. Update UI & Feedback
+  // 4. Update UI & Feedback immediately
   if (btn) {
     btn.innerHTML = 'Subscribed! ✓';
     btn.style.background = '#2e7d32';
@@ -2268,13 +2287,10 @@ window.handleNewsletterSubscribe = (e) => {
   const successEl = document.getElementById('newsletterSuccess');
   if (successEl) {
     successEl.style.display = 'block';
+    successEl.innerHTML = `✦ Thank you for subscribing, <strong>${email}</strong>! Exclusive festive offers & bridal lookbooks will be sent to your inbox.`;
   }
 
-  if (typeof showToast === 'function') {
-    showToast("Subscribed Successfully!", "success", "Welcome to ROKEA Privé! You will now receive exclusive offers & bridal lookbooks.");
-  } else {
-    alert("Thank you for subscribing to ROKEA by RK exclusive offers!");
-  }
+  alert("Thank you for subscribing to ROKEA Exclusive Offers! We have registered " + email + " successfully.");
 
   input.value = '';
 
@@ -2285,13 +2301,11 @@ window.handleNewsletterSubscribe = (e) => {
       btn.style.background = '';
       btn.style.color = '';
     }
-    if (successEl) {
-      setTimeout(() => { successEl.style.display = 'none'; }, 6000);
-    }
-  }, 3500);
+  }, 4000);
+
+  return false;
 };
 
-// Also attach event listener to newsletter form or button on DOMContentLoaded
 document.addEventListener('DOMContentLoaded', () => {
   const nlForm = document.getElementById('newsletterForm');
   if (nlForm) {
@@ -2578,37 +2592,34 @@ let stylistCache = new Map();
 
 const fallbackStylistProducts = [
   {
-    id: 'saree_royal_crimson',
-    name: 'Kanjivaram Crimson Red Pure Silk Saree',
+    id: '1776414006390',
+    name: 'Vintage Style Blue and Pink Silk Saree',
     category: 'sarees',
-    price: 4499,
-    image: 'image copy 2.png',
-    imageHover: 'image copy 3.png',
-    stylistRole: 'Exquisite Silk Saree',
-    slug: 'kanjivaram-crimson-red-pure-silk-saree',
-    description: 'Pure handloom silk saree with rich gold zari border, curated for royal occasions.'
+    price: 1500,
+    image: 'https://i.postimg.cc/sXxwCWBs/DSC01979.jpg',
+    stylistRole: 'Exquisite Handloom Saree',
+    slug: 'vintage-style-blue-and-pink-silk-saree',
+    description: 'Pure handloom silk saree with rich gold zari border, curated for royal festive celebrations.'
   },
   {
-    id: 'jewel_temple_nakshi',
-    name: 'Antique Temple Lakshmi Nakshi Choker Set',
+    id: '1776423130876',
+    name: 'Lakshmi Antique Temple Haaram & Choker Set',
     category: 'imitation',
-    price: 2499,
-    image: 'temple_jewellery_set.png',
-    imageHover: 'temple_jewellery_set.png',
+    price: 4999,
+    image: 'https://i.postimg.cc/zBN8dJ3R/DSC01846.jpg',
     stylistRole: 'Heritage Jewellery Set',
-    slug: 'antique-temple-lakshmi-nakshi-choker-set',
-    description: 'Traditional handcrafted temple jewellery set adorned with auspicious motifs.'
+    slug: 'lakshmi-antique-temple-haaram-choker-set',
+    description: 'Traditional handcrafted temple jewellery set adorned with auspicious Goddess Lakshmi motifs.'
   },
   {
-    id: 'jewel_kundan_jhumkas',
-    name: 'Royal Kundan Gold Plated Jhumkas',
+    id: '1776423529914',
+    name: 'Ruby Raga Royal Necklace Set',
     category: 'imitation',
-    price: 999,
-    image: 'image copy 5.png',
-    imageHover: 'image copy 6.png',
-    stylistRole: 'Matching Royal Earrings',
-    slug: 'royal-kundan-gold-plated-jhumkas',
-    description: 'Festive handcrafted Kundan drop jhumkas that perfectly complete your ensemble.'
+    price: 1200,
+    image: 'https://i.postimg.cc/qRr4mkgj/DSC01914.jpg',
+    stylistRole: 'Matching Royal Jewellery',
+    slug: 'ruby-raga-royal-necklace-set',
+    description: 'Festive handcrafted Ruby drop necklace and earrings that perfectly complete your ensemble.'
   }
 ];
 
@@ -2625,12 +2636,12 @@ function curateLuxuryLook() {
   );
   if (sareesList.length > 0) {
     const selectedSaree = sareesList[Math.floor(Math.random() * sareesList.length)];
-    look.push({ ...selectedSaree, stylistRole: 'Exquisite Handwoven Saree' });
+    look.push({ ...selectedSaree, stylistRole: 'Exquisite Handloom Saree' });
   } else {
     look.push(fallbackStylistProducts[0]);
   }
 
-  // 2. Get Jewellery Set (category == 'imitation' without earring/bangle keywords)
+  // 2. Get Jewellery Set
   const jewelryKeywords = ['earring', 'jhumka', 'stud', 'bangle', 'valayal', 'kangan', 'kada'];
   const jewelList = allProds.filter(p =>
     (p.category && p.category.toLowerCase() === 'imitation') &&
@@ -2643,14 +2654,14 @@ function curateLuxuryLook() {
     look.push(fallbackStylistProducts[1]);
   }
 
-  // 3. Get Earring or Bangle
+  // 3. Get Earring or Bangle or Secondary Jewel
   const earringBangleList = allProds.filter(p =>
     (p.category && p.category.toLowerCase() === 'imitation') &&
     jewelryKeywords.some(kw => (p.name || '').toLowerCase().includes(kw))
   );
   if (earringBangleList.length > 0) {
     const selectedEarringBangle = earringBangleList[Math.floor(Math.random() * earringBangleList.length)];
-    look.push({ ...selectedEarringBangle, stylistRole: 'Matching Royal Earrings' });
+    look.push({ ...selectedEarringBangle, stylistRole: 'Matching Royal Jewellery' });
   } else {
     look.push(fallbackStylistProducts[2]);
   }
@@ -2665,6 +2676,19 @@ function curateLuxuryLook() {
   return look;
 }
 
+window.triggerStylistUpload = () => {
+  const inp = document.getElementById('userImageInput');
+  if (inp) {
+    inp.value = '';
+    inp.click();
+  }
+};
+
+window.trySampleLook = () => {
+  const samplePhoto = 'ai_stylist_teaser.png';
+  window.handleUserImage(samplePhoto);
+};
+
 window.resetStylist = () => {
   const zone = document.getElementById('uploadZone');
   const previewCont = document.getElementById('userPreviewCont');
@@ -2678,27 +2702,30 @@ window.resetStylist = () => {
   if (input) input.value = '';
 };
 
-window.handleUserImage = async (event) => {
+window.handleUserImage = async (eventOrUrl) => {
   let file = null;
-  if (event && event.target && event.target.files && event.target.files[0]) {
-    file = event.target.files[0];
-  } else if (event && event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0]) {
-    file = event.dataTransfer.files[0];
-  } else if (event instanceof File) {
-    file = event;
-  }
-  if (!file) return;
+  let directUrl = null;
 
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    const imageData = e.target.result;
+  if (typeof eventOrUrl === 'string') {
+    directUrl = eventOrUrl;
+  } else if (eventOrUrl && eventOrUrl.target && eventOrUrl.target.files && eventOrUrl.target.files[0]) {
+    file = eventOrUrl.target.files[0];
+  } else if (eventOrUrl && eventOrUrl.dataTransfer && eventOrUrl.dataTransfer.files && eventOrUrl.dataTransfer.files[0]) {
+    file = eventOrUrl.dataTransfer.files[0];
+  } else if (eventOrUrl instanceof File) {
+    file = eventOrUrl;
+  }
+
+  if (!file && !directUrl) return;
+
+  const processLook = (previewSrc) => {
     const previewImg = document.getElementById('userPhotoPreview');
     const previewCont = document.getElementById('userPreviewCont');
     const zone = document.getElementById('uploadZone');
     const loader = document.getElementById('aiAnalysis');
     const results = document.getElementById('aiResults');
 
-    if (previewImg) previewImg.src = imageData;
+    if (previewImg) previewImg.src = previewSrc;
     if (zone) zone.style.display = 'none';
     if (previewCont) previewCont.style.display = 'block';
 
@@ -2708,7 +2735,7 @@ window.handleUserImage = async (event) => {
         <p id="aiStatus" style="font-family:'Playfair Display', serif; font-size:18px; color:var(--gold); margin-bottom:8px; font-weight:600;">Analyzing Your Aesthetic Aura...</p>
         <p id="aiSubStatus" style="font-family:'Poppins', sans-serif; font-size:12px; color:#e0d0b8; margin:0 0 16px;">Scanning facial features, tone & lighting</p>
         <div id="aiProgressContainer" style="width: 85%; max-width: 320px; margin: 0 auto; background: rgba(255,255,255,0.12); height: 6px; border-radius: 4px; overflow: hidden; position: relative;">
-          <div id="aiProgressBar" style="width: 15%; background: linear-gradient(90deg, #d4af37, #ffd700); height: 100%; transition: width 0.4s ease;"></div>
+          <div id="aiProgressBar" style="width: 25%; background: linear-gradient(90deg, #d4af37, #ffd700); height: 100%; transition: width 0.3s ease;"></div>
         </div>
       `;
       loader.style.display = 'block';
@@ -2718,42 +2745,48 @@ window.handleUserImage = async (event) => {
     const statusEl = document.getElementById('aiStatus');
     const subStatusEl = document.getElementById('aiSubStatus');
     const barEl = document.getElementById('aiProgressBar');
-    const updateProgress = (pct, title, sub) => {
-      if (barEl) barEl.style.width = pct + '%';
-      if (statusEl && title) statusEl.innerText = title;
-      if (subStatusEl && sub) subStatusEl.innerText = sub;
-    };
 
     setTimeout(() => {
-      updateProgress(45, 'Detecting Radiance & Skin Glow...', 'Analyzing warm & festive color undertones');
-    }, 450);
+      if (barEl) barEl.style.width = '70%';
+      if (statusEl) statusEl.innerText = 'Matching ROKEA Heritage Collection...';
+      if (subStatusEl) subStatusEl.innerText = 'Curating handloom sarees, choker sets & earrings';
+    }, 400);
 
     setTimeout(() => {
-      updateProgress(80, 'Matching ROKEA Heritage Collection...', 'Curating handloom sarees, choker sets & earrings');
-    }, 1000);
+      if (barEl) barEl.style.width = '100%';
+      if (statusEl) statusEl.innerText = 'Look Curated Successfully!';
+      if (subStatusEl) subStatusEl.innerText = 'Generating your exclusive AI festive ensemble';
 
-    setTimeout(() => {
-      updateProgress(100, 'Look Curated Successfully!', 'Generating your exclusive AI festive ensemble');
       setTimeout(() => {
         if (loader) loader.style.display = 'none';
-        if (results) results.style.display = 'block';
-
-        let curatedLook;
-        if (stylistCache.has(imageData)) {
-          curatedLook = stylistCache.get(imageData);
-        } else {
-          curatedLook = curateLuxuryLook();
-          stylistCache.set(imageData, curatedLook);
+        if (results) {
+          results.style.display = 'block';
+          results.style.opacity = '1';
+          results.style.visibility = 'visible';
         }
 
+        const curatedLook = curateLuxuryLook();
         renderRecommendations(curatedLook);
 
-        // Scroll to results smoothly
-        results.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 450);
-    }, 1600);
+        if (results) {
+          results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 300);
+    }, 850);
   };
-  reader.readAsDataURL(file);
+
+  if (directUrl) {
+    processLook(directUrl);
+  } else if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      processLook(e.target.result);
+    };
+    reader.onerror = () => {
+      alert("Could not read image file. Please try selecting another photo.");
+    };
+    reader.readAsDataURL(file);
+  }
 };
 
 function renderRecommendations(selected) {
@@ -2769,24 +2802,24 @@ function renderRecommendations(selected) {
   }
 
   recContainer.innerHTML = selected.map(p => {
-    const priceVal = (extractPriceFromDesc(p.description) || p.price || 0);
-    const mainImg = optimizeImageUrl(p.image || p.img);
-    const hoverImg = optimizeImageUrl(p.imageHover || p.imgHover || p.image || p.img);
+    const rawPrice = (typeof p.price === 'string' ? parseInt(p.price.replace(/[^0-9]/g, '')) : p.price) || 1500;
+    const priceVal = (extractPriceFromDesc(p.description) || rawPrice || 0);
+    const mainImg = optimizeImageUrl(p.image || p.img || 'https://i.postimg.cc/sXxwCWBs/DSC01979.jpg');
+    const productUrl = getProductLink ? getProductLink(p) : 'product-details.html?id=' + p.id;
 
     return `
-    <div class="product-card stylist-recommendation-card" onclick="openProductDetail('${p.id}')" style="background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.08); border:1px solid rgba(212,175,55,0.3); display:flex; flex-direction:column; text-align:center; transition:transform 0.3s ease, box-shadow 0.3s ease; cursor:pointer;">
+    <div class="product-card stylist-recommendation-card" onclick="window.location.href='${productUrl}'" style="background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.08); border:1px solid rgba(212,175,55,0.3); display:flex; flex-direction:column; text-align:center; transition:transform 0.3s ease, box-shadow 0.3s ease; cursor:pointer;">
       <div style="background:linear-gradient(135deg, #ffd700 0%, #d4af37 50%, #aa7c11 100%); color:#1c0d02; font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:1.5px; padding:6px 14px; border-radius:50px; width:fit-content; margin:14px auto 8px auto; box-shadow:0 4px 12px rgba(212,175,55,0.35);">
         ✦ ${p.stylistRole || 'Heritage Piece'}
       </div>
       <div class="product-img" style="aspect-ratio:3/4; overflow:hidden; position:relative; background:#fbfbfb;">
-        <img src="${mainImg}" width="300" height="400" class="img-main" loading="lazy" decoding="async" ${getSEOAttributes(p)} style="width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease;" onerror="this.onerror=null; this.src='image copy 2.png';">
-        <img src="${hoverImg}" width="300" height="400" class="img-hover" loading="lazy" decoding="async" ${getSEOAttributes(p)} style="width:100%; height:100%; object-fit:cover;" onerror="this.style.display='none'">
+        <img src="${mainImg}" class="img-main" loading="eager" alt="${p.name}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.5s ease;" onerror="this.onerror=null; this.src='https://i.postimg.cc/sXxwCWBs/DSC01979.jpg';">
       </div>
       <div style="padding: 16px 14px 18px; text-align: center; display:flex; flex-direction:column; flex-grow:1;">
-        <div style="color:var(--gold-dark); font-weight:700; font-size: 16px; margin-bottom: 4px;">₹${priceVal.toLocaleString('en-IN')}</div>
-        <div style="font-size:9.5px; color:var(--gold); text-transform: uppercase; letter-spacing:1px; margin-bottom: 6px; font-weight:600;">${p.category || 'Luxury'}</div>
+        <div style="color:var(--gold-dark); font-weight:700; font-size: 17px; margin-bottom: 4px;">₹${priceVal.toLocaleString('en-IN')}</div>
+        <div style="font-size:9.5px; color:var(--gold); text-transform: uppercase; letter-spacing:1px; margin-bottom: 6px; font-weight:600;">${(p.category || 'Luxury').toUpperCase()}</div>
         <h3 class="product-name" style="font-family:'Playfair Display',serif; font-size:15px; color:var(--dark); margin:0 auto 14px; line-height:1.35; font-weight:600; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">${p.name}</h3>
-        <button class="btn-primary" style="padding:10px 16px; font-size:12px; margin-top:auto; width:100%; border-radius:50px; font-weight:700; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="event.stopPropagation(); addToCartFromStylist('${p.id}')">Add to Look <i class="fas fa-shopping-bag"></i></button>
+        <button class="btn-primary" type="button" style="padding:10px 16px; font-size:12px; margin-top:auto; width:100%; border-radius:50px; font-weight:700; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="event.stopPropagation(); addToCartFromStylist('${p.id}')">Add to Look <i class="fas fa-shopping-bag"></i></button>
       </div>
     </div>`;
   }).join('');
@@ -2803,7 +2836,7 @@ window.addToCartFromStylist = (id) => {
   cart.push(p);
   localStorage.setItem('saforio_cart', JSON.stringify(cart));
   if (typeof updateCartIcon === 'function') updateCartIcon();
-  showToast('Added to Cart', 'success', `${p.name} has been added to your styled look.`);
+  alert(p.name + " has been added to your cart!");
 };
 
 // Setup Drag & Drop on Upload Zone

@@ -766,7 +766,8 @@
             </div>
           </div>
 
-          <button class="btn-primary pill-btn" id="forgotSubmitBtn" onclick="handleForgotPassword()">SEND RESET LINK <i class="fas fa-paper-plane"></i></button>
+          <button class="btn-primary pill-btn" id="forgotSubmitBtn" type="button" onclick="handleForgotPassword()">SEND RESET LINK <i class="fas fa-paper-plane"></i></button>
+          <div id="forgotStatusMessage" style="display:none; margin-top:12px; text-align:left;"></div>
 
           <p class="auth-footer-text">Remember your password? <a href="javascript:void(0)" onclick="toggleAuth(true)" class="auth-switch-link">Back to Login</a></p>
         </div>
