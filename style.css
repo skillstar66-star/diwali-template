@@ -6990,14 +6990,23 @@ img {
 }
 
 /* =============================================
-   NEW PRODUCT ARRIVALS SECTION (HOME PAGE)
+   NEW PRODUCT ARRIVALS SHOWCASE BANNER
+   Matching Diwali Festival & Bridal Mockup
    ============================================= */
 .new-arrivals-section {
-  padding: 70px 20px 65px;
-  background: radial-gradient(ellipse at 50% 0%, #FAF5EC 0%, #F3EDE0 100%);
   position: relative;
+  min-height: 520px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 85px 24px 80px;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  border-top: 1px solid rgba(201, 168, 76, 0.4);
+  border-bottom: 1px solid rgba(201, 168, 76, 0.4);
+  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.7);
   overflow: hidden;
-  border-bottom: 1px solid rgba(201, 168, 76, 0.2);
 }
 
 .new-arrivals-section::before {
@@ -7007,286 +7016,391 @@ img {
   left: 0;
   right: 0;
   height: 2px;
-  background: linear-gradient(90deg, transparent 0%, var(--gold) 50%, transparent 100%);
-  opacity: 0.7;
+  background: linear-gradient(90deg, transparent 0%, #D4AF37 50%, transparent 100%);
+  z-index: 3;
+}
+
+.new-arrivals-section::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #D4AF37 50%, transparent 100%);
+  z-index: 3;
+}
+
+.na-banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(16, 9, 4, 0.65) 0%, rgba(20, 12, 6, 0.35) 55%, rgba(10, 5, 2, 0.6) 100%);
+  pointer-events: none;
+  z-index: 1;
 }
 
 .new-arrivals-container {
-  max-width: 1280px;
+  max-width: 1320px;
   margin: 0 auto;
   position: relative;
   z-index: 2;
+  width: 100%;
 }
 
-.na-header {
-  text-align: center;
-  margin-bottom: 35px;
-}
-
-.na-header .center-lotus-icon {
+.na-diwali-showcase {
   display: flex;
-  justify-content: center;
   align-items: center;
-  margin-bottom: 10px;
-  animation: floatLotus 4s ease-in-out infinite;
+  justify-content: center;
+  gap: clamp(24px, 4.5vw, 60px);
+  width: 100%;
 }
 
-.na-eyebrow {
-  display: inline-block;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 3.5px;
-  color: var(--gold-dark);
-  text-transform: uppercase;
-  margin-bottom: 8px;
+/* Typography Block */
+.na-typography-block {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 620px;
 }
 
-.na-main-title {
-  font-family: 'Cinzel', serif;
-  font-size: clamp(28px, 4vw, 42px);
-  color: var(--dark);
-  font-weight: 600;
-  letter-spacing: 1px;
-  line-height: 1.25;
-  margin-bottom: 10px;
-}
-
-.na-main-title em {
-  font-family: 'Playfair Display', serif;
-  font-style: italic;
-  color: var(--gold);
-  font-weight: 400;
-}
-
-.na-subtitle {
-  font-size: 11.5px;
-  letter-spacing: 3px;
-  color: var(--muted);
-  text-transform: uppercase;
-  margin-bottom: 14px;
-}
-
-.na-decor-line {
+/* Top Lotus Emblem */
+.na-top-emblem {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  margin: 0 auto;
-  max-width: 220px;
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 6px;
 }
 
-.na-decor-line .na-line {
+.na-emb-line {
   flex: 1;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--gold));
+  position: relative;
 }
 
-.na-decor-line .na-line:last-child {
-  background: linear-gradient(90deg, var(--gold), transparent);
+.na-emb-left {
+  background: linear-gradient(90deg, transparent, #D4AF37);
 }
 
-.na-decor-line .na-gem {
-  color: var(--gold);
-  font-size: 14px;
+.na-emb-right {
+  background: linear-gradient(90deg, #D4AF37, transparent);
+}
+
+.na-emb-left::before {
+  content: '◆';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 7px;
+  color: #D4AF37;
   line-height: 1;
 }
 
-/* Category Filter Tabs */
-.na-tabs-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 40px;
-  flex-wrap: wrap;
-}
-
-.na-tab-btn {
-  background: rgba(255, 255, 255, 0.75);
-  border: 1.5px solid rgba(201, 168, 76, 0.35);
-  color: var(--dark);
-  font-family: 'Poppins', sans-serif;
-  font-size: 12.5px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  padding: 9px 24px;
-  border-radius: 50px;
-  cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
-}
-
-.na-tab-btn:hover {
-  background: #ffffff;
-  border-color: var(--gold);
-  color: var(--gold-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(201, 168, 76, 0.2);
-}
-
-.na-tab-btn.active {
-  background: linear-gradient(135deg, #c9a84c 0%, #8b6914 100%);
-  color: #ffffff;
-  border-color: transparent;
-  box-shadow: 0 6px 20px rgba(139, 105, 20, 0.32);
-  transform: translateY(-2px);
-}
-
-/* Products Grid for New Arrivals */
-.na-products-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
-  margin-bottom: 45px;
-}
-
-.na-product-card {
-  position: relative;
-  border-radius: 10px;
-  overflow: visible;
-  background: #ffffff;
-  border: 1px solid rgba(201, 168, 76, 0.2);
-  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-}
-
-.na-product-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 14px 32px rgba(139, 105, 20, 0.16);
-  border-color: rgba(201, 168, 76, 0.45);
-}
-
-.na-badge {
+.na-emb-right::after {
+  content: '◆';
   position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 6;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 7px;
+  color: #D4AF37;
+  line-height: 1;
+}
+
+.na-lotus-icon {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: linear-gradient(135deg, #2b1810 0%, #150b07 100%);
-  color: var(--gold-light);
-  border: 1px solid rgba(201, 168, 76, 0.5);
-  font-size: 9.5px;
+  justify-content: center;
+  filter: drop-shadow(0 0 10px rgba(212, 175, 55, 0.7));
+  animation: floatLotus 4s ease-in-out infinite;
+}
+
+/* DIWALI Eyebrow */
+.na-diwali-eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(13px, 1.6vw, 17px);
   font-weight: 700;
-  letter-spacing: 1.2px;
+  letter-spacing: 9px;
+  color: #F0DEB4;
   text-transform: uppercase;
-  padding: 5px 10px;
+  margin: 6px 0 2px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+}
+
+/* Title Lockup */
+.na-title-lockup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+}
+
+.na-title-serif {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(34px, 5.2vw, 68px);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  line-height: 1.05;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5E5C0 35%, #D4AF37 75%, #AA822A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 4px 18px rgba(0, 0, 0, 0.95));
+  margin: 0;
+  text-transform: none;
+}
+
+.na-title-cursive {
+  font-family: 'Great Vibes', cursive;
+  font-size: clamp(48px, 7.8vw, 98px);
+  font-weight: 400;
+  line-height: 0.95;
+  background: linear-gradient(180deg, #FFF8E7 0%, #F3D27A 45%, #C99A2C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 6px 22px rgba(0, 0, 0, 0.98));
+  margin: -6px 0 12px 0;
+  text-transform: none;
+}
+
+/* Category Pills (SAREES • JEWELLERY • MORE) */
+.na-category-pills {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(8px, 1.8vw, 16px);
+  margin-bottom: 14px;
+}
+
+.na-cat-item {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(11.5px, 1.4vw, 15px);
+  font-weight: 700;
+  letter-spacing: 4px;
+  color: #E8D5A3;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 8px;
   border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.25s ease;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+}
+
+.na-cat-item:hover {
+  color: #FFFFFF;
+  text-shadow: 0 0 12px rgba(212, 175, 55, 0.9);
+  transform: translateY(-1px);
+}
+
+.na-cat-sep {
+  color: #D4AF37;
+  font-size: 14px;
+  opacity: 0.8;
+}
+
+/* Tagline with Ornaments */
+.na-tagline-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+}
+
+.na-gold-rule {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.na-gold-rule .rule-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.8), transparent);
+}
+
+.na-gold-rule .rule-diamond {
+  color: #D4AF37;
+  font-size: 8px;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px rgba(212, 175, 55, 0.8));
+}
+
+.na-tagline-text {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(10px, 1.15vw, 13px);
+  font-weight: 600;
+  letter-spacing: 3.5px;
+  color: rgba(255, 240, 215, 0.92);
+  text-transform: uppercase;
+  margin: 5px 0;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.95);
+}
+
+/* Rosette Offer Badge */
+.na-badge-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  flex-shrink: 0;
+}
+
+.na-badge-wrapper:hover {
+  transform: scale(1.08) rotate(-2deg);
+}
+
+.na-sunburst-glow {
+  position: absolute;
+  width: 170px;
+  height: 170px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.45) 0%, rgba(212, 175, 55, 0.15) 50%, transparent 72%);
+  border-radius: 50%;
+  animation: pulseGlow 3s ease-in-out infinite;
   pointer-events: none;
 }
 
-.na-badge svg {
-  color: var(--gold);
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 1; }
 }
 
-/* View All CTA */
-.na-cta-wrap {
-  text-align: center;
-  margin-top: 15px;
-}
-
-.na-explore-btn {
-  display: inline-flex;
+.na-rosette-seal {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #7A1828 0%, #4D0A14 65%, #2B050B 100%);
+  border: 3px solid #D4AF37;
+  box-shadow: 
+    0 0 0 3px rgba(212, 175, 55, 0.3),
+    0 8px 30px rgba(0, 0, 0, 0.7),
+    inset 0 0 20px rgba(0, 0, 0, 0.6),
+    inset 0 2px 4px rgba(255, 255, 255, 0.3);
+  display: flex;
   align-items: center;
-  gap: 12px;
-  background: transparent;
-  color: var(--dark);
-  border: 1.5px solid var(--gold);
+  justify-content: center;
+  padding: 6px;
+}
+
+.na-rosette-seal::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px dashed rgba(212, 175, 55, 0.65);
+  animation: rotateBorder 35s linear infinite;
+  pointer-events: none;
+}
+
+.na-rosette-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 1px solid rgba(212, 175, 55, 0.55);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8px 6px;
+  background: radial-gradient(circle at 40% 40%, rgba(122, 24, 40, 0.6), rgba(43, 5, 11, 0.8));
+}
+
+.na-seal-diya {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2px;
+  filter: drop-shadow(0 0 6px rgba(255, 215, 0, 0.8));
+}
+
+.na-seal-sub {
   font-family: 'Poppins', sans-serif;
-  font-size: 12px;
+  font-size: 8.5px;
   font-weight: 700;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
+  color: #F3D27A;
   text-transform: uppercase;
-  text-decoration: none;
-  padding: 14px 36px;
-  border-radius: 50px;
-  transition: all 0.35s ease;
-  box-shadow: 0 4px 15px rgba(201, 168, 76, 0.12);
+  line-height: 1.1;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
 }
 
-.na-explore-btn:hover {
-  background: linear-gradient(135deg, #c9a84c 0%, #8b6914 100%);
-  color: #ffffff;
-  border-color: transparent;
-  box-shadow: 0 8px 25px rgba(139, 105, 20, 0.3);
-  transform: translateY(-3px);
+.na-seal-main {
+  font-family: 'Great Vibes', cursive;
+  font-size: 32px;
+  font-weight: 400;
+  color: #FFFFFF;
+  line-height: 0.95;
+  margin-top: 1px;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4));
 }
 
-.na-explore-btn svg {
-  transition: transform 0.3s ease;
-}
-
-.na-explore-btn:hover svg {
-  transform: translateX(5px);
-}
-
-/* Responsive Rules for New Arrivals */
-@media (max-width: 1100px) {
-  .na-products-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+/* Mobile & Tablet Responsiveness */
+@media (max-width: 900px) {
+  .new-arrivals-section {
+    min-height: 440px;
+    padding: 60px 18px 55px;
+  }
+  .na-diwali-showcase {
+    flex-direction: column;
+    gap: 24px;
+  }
+  .na-badge-wrapper {
+    margin-top: 6px;
+  }
+  .na-rosette-seal {
+    width: 120px;
+    height: 120px;
+  }
+  .na-seal-main {
+    font-size: 28px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 600px) {
   .new-arrivals-section {
+    min-height: 400px;
     padding: 50px 14px 45px;
   }
-  .na-header {
-    margin-bottom: 25px;
+  .na-diwali-eyebrow {
+    letter-spacing: 6px;
   }
-  .na-tabs-container {
+  .na-title-serif {
+    font-size: 30px;
+  }
+  .na-title-cursive {
+    font-size: 44px;
+  }
+  .na-category-pills {
     gap: 8px;
-    margin-bottom: 25px;
   }
-  .na-tab-btn {
+  .na-cat-item {
     font-size: 11px;
-    padding: 7px 16px;
+    letter-spacing: 2.5px;
+  }
+  .na-tagline-text {
+    font-size: 9.5px;
+    letter-spacing: 2px;
+  }
+  .na-rosette-seal {
+    width: 105px;
+    height: 105px;
+  }
+  .na-seal-sub {
+    font-size: 7.5px;
     letter-spacing: 1px;
   }
-  .na-products-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    margin-bottom: 30px;
-  }
-  .na-product-card .product-info {
-    padding: 10px !important;
-  }
-  .na-product-card .product-name {
-    font-size: 13px !important;
-    margin: 4px 0 8px 0 !important;
-    line-height: 1.3 !important;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .na-product-card .price-main {
-    font-size: 15px !important;
-  }
-  .na-badge {
-    font-size: 8px;
-    padding: 3px 7px;
-    top: 8px;
-    left: 8px;
-  }
-  .na-badge svg {
-    width: 9px;
-    height: 9px;
-  }
-  .na-explore-btn {
-    padding: 12px 26px;
-    font-size: 11px;
-    letter-spacing: 1.5px;
-  }
-}
-
-@media (max-width: 420px) {
-  .na-products-grid {
-    gap: 8px;
+  .na-seal-main {
+    font-size: 24px;
   }
 }
 
