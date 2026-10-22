@@ -157,6 +157,7 @@
     </div>
     <ul class="nav-links">
       <li><a href="index.html">Home</a></li>
+      <li><a href="#new-arrivals">New Arrivals</a></li>
       <li><a href="about.html">About</a></li>
       <li><a href="collections.html">Products</a></li>
       <li><a href="#custom-blouse">Custom Blouse</a></li>
@@ -301,7 +302,62 @@
     </div>
   </div>
 
+  <!-- ============================================= -->
+  <!-- NEW PRODUCT ARRIVALS SECTION                  -->
+  <!-- ============================================= -->
+  <section class="new-arrivals-section" id="new-arrivals">
+    <div class="new-arrivals-container">
+      
+      <!-- Section Header -->
+      <div class="na-header">
+        <div class="center-lotus-icon">
+          <svg viewBox="0 0 24 24" width="28" height="28" fill="var(--gold)">
+            <path d="M12 2C10.5 5 8 9 8 13c0 2.2 1.8 4 4 4s4-1.8 4-4c0-4-2.5-8-4-11zm0 13c-1.1 0-2-.9-2-2 0-1.5 1.2-3.8 2-5.4.8 1.6 2 3.9 2 5.4 0 1.1-.9 2-2 2zm-8 4c0 1.7 3.6 3 8 3s8-1.3 8-3c0-1.2-1.9-2.2-4.8-2.7l-.4.9c2.4.4 3.7 1.1 3.7 1.8 0 1-3 2-6.5 2S5.5 20.3 5.5 19.3c0-.7 1.3-1.4 3.7-1.8l-.4-.9C5.9 17.1 4 18.1 4 19.3z"/>
+          </svg>
+        </div>
+        <span class="na-eyebrow">FRESH OFF THE LOOM &amp; ATELIER</span>
+        <h2 class="na-main-title">
+          New Product <em class="accent-serif-script">Arrivals</em>
+        </h2>
+        <p class="na-subtitle">EXPLORE OUR LATEST HANDPICKED SAREES &amp; HERITAGE JEWELLERY</p>
+        <div class="na-decor-line">
+          <span class="na-line"></span>
+          <span class="na-gem">✦</span>
+          <span class="na-line"></span>
+        </div>
+      </div>
 
+      <!-- Category Filter Tabs -->
+      <div class="na-tabs-container">
+        <button type="button" class="na-tab-btn active" onclick="filterNewArrivals('all', this)">
+          <span>All Arrivals</span>
+        </button>
+        <button type="button" class="na-tab-btn" onclick="filterNewArrivals('sarees', this)">
+          <span>Sarees</span>
+        </button>
+        <button type="button" class="na-tab-btn" onclick="filterNewArrivals('imitation', this)">
+          <span>Jewellery</span>
+        </button>
+      </div>
+
+      <!-- New Arrivals Grid -->
+      <div class="products-grid na-products-grid" id="new-arrivals-grid">
+        <!-- Rendered dynamically by script.js -->
+      </div>
+
+      <!-- View All CTA -->
+      <div class="na-cta-wrap">
+        <a href="collections.html" class="na-explore-btn">
+          <span>VIEW FULL COLLECTION</span>
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+
+    </div>
+  </section>
 
   <!-- MAIN PRODUCTS SECTION -->
   <section class="products-section" id="products">
@@ -1599,6 +1655,7 @@
     </div>
     <ul class="mobile-nav-links">
       <li><a href="index.html" onclick="toggleMobileMenu()">Home</a></li>
+      <li><a href="#new-arrivals" onclick="toggleMobileMenu()">New Arrivals</a></li>
       <li><a href="about.html" onclick="toggleMobileMenu()">About</a></li>
       <li><a href="collections.html" onclick="toggleMobileMenu()">Products</a></li>
       <li><a href="#custom-blouse" onclick="toggleMobileMenu()">Custom Blouse</a></li>
