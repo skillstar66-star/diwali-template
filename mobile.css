@@ -518,6 +518,8 @@
         margin-left: 0 !important;
         display: flex;
         justify-content: center;
+        position: static !important;
+        transform: none !important;
     }
 
     .premium-select {
