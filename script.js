@@ -193,6 +193,7 @@ async function loadUsers() {
 
 loadProducts().then(() => {
   renderMarquee();
+  if (typeof renderNewArrivals === 'function') renderNewArrivals();
 });
 loadUsers();
 
@@ -430,7 +431,7 @@ function addToWishlist(productId) {
 
   localStorage.setItem('saforio_wishlist', JSON.stringify(wishlist));
   updateWishlistIcon();
-  renderGrid();
+  renderGrid(); if (typeof renderNewArrivals === 'function') renderNewArrivals();
   if (document.getElementById('wishlistModal') && document.getElementById('wishlistModal').style.display === 'flex') {
     renderWishlist();
   }
@@ -442,7 +443,7 @@ function removeFromWishlist(index) {
   localStorage.setItem('saforio_wishlist', JSON.stringify(wishlist));
   updateWishlistIcon();
   renderWishlist();
-  renderGrid();
+  renderGrid(); if (typeof renderNewArrivals === 'function') renderNewArrivals();
 }
 
 function updateWishlistIcon() {
@@ -1501,6 +1502,103 @@ function renderGrid() {
   }).join('');
 }
 
+// =============================================
+// NEW PRODUCT ARRIVALS (HOME PAGE)
+// =============================================
+let currentNewArrivalsCategory = 'all';
+
+window.filterNewArrivals = (cat, btnEl) => {
+  currentNewArrivalsCategory = cat;
+  if (btnEl) {
+    document.querySelectorAll('.na-tab-btn').forEach(btn => btn.classList.remove('active'));
+    btnEl.classList.add('active');
+  }
+  renderNewArrivals();
+};
+
+function renderNewArrivals() {
+  const grid = document.getElementById('new-arrivals-grid');
+  if (!grid) return;
+
+  if (!products || products.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--muted); font-size: 14px;">
+        <p>Loading newest arrivals...</p>
+      </div>`;
+    return;
+  }
+
+  // Clone array and sort newest first (highest numeric id / timestamp, then position)
+  let sorted = [...products].sort((a, b) => {
+    const idA = parseFloat(a.id) || 0;
+    const idB = parseFloat(b.id) || 0;
+    if (idB !== idA) return idB - idA;
+    return (a.position || 0) - (b.position || 0);
+  });
+
+  // Filter by category if not 'all'
+  if (currentNewArrivalsCategory !== 'all') {
+    sorted = sorted.filter(p => p.category === currentNewArrivalsCategory);
+  }
+
+  // Display top 8 newest products
+  const displayItems = sorted.slice(0, 8);
+
+  if (displayItems.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--muted); font-size: 14px;">
+        <p>No new arrivals found in this category.</p>
+      </div>`;
+    return;
+  }
+
+  grid.innerHTML = displayItems.map((p) => {
+    const inWishlist = wishlist && wishlist.find(w => w.id == p.id);
+    const isOOS = p.stock === 'Out of Stock';
+    const mainImg = optimizeImageUrl(p.image || p.img);
+    const hoverImg = optimizeImageUrl(p.imageHover || p.imgHover || p.image || p.img);
+    const priceVal = extractPriceFromDesc(p.description) || p.price || 0;
+    const categoryName = (p.category === 'imitation' ? 'JEWELLERY' : (p.category || 'SAREES')).toUpperCase();
+
+    return `
+    <div class="product-card na-product-card" onclick="openProductDetail(${p.id})">
+      <div class="na-badge">
+        <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor"><path d="M12 2L14.4 8.6L21.5 9.1L16 13.7L17.7 20.6L12 16.9L6.3 20.6L8 13.7L2.5 9.1L9.6 8.6L12 2Z"/></svg>
+        <span>NEW ARRIVAL</span>
+      </div>
+      ${isOOS ? `<div class="oos-ribbon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:9px;height:9px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Sold Out</div>` : ''}
+
+      <div class="product-img ${isOOS ? 'out-of-stock' : ''}">
+        <img src="${mainImg}" width="300" height="400" class="img-main" loading="lazy" decoding="async" ${getSEOAttributes(p)} onerror="this.onerror=null; this.src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'; this.style.background='linear-gradient(135deg,#f0e6d3,#faf6ef)';">
+        <img src="${hoverImg}" width="300" height="400" class="img-hover" loading="lazy" decoding="async" ${getSEOAttributes(p)} onerror="this.style.display='none'">
+        <div class="product-wish ${inWishlist ? 'active' : ''}" onclick="event.stopPropagation(); addToWishlist('${p.id}')" title="Add to Wishlist">
+          <svg class="wish-icon-svg" viewBox="0 0 24 24" fill="${inWishlist ? '#e91e63' : 'none'}" stroke="${inWishlist ? '#e91e63' : '#666'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px; transition: all 0.2s ease;"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path></svg>
+        </div>
+        <div class="product-share" onclick="event.stopPropagation(); shareProduct('${p.id}')" title="Share Product">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+        </div>
+      </div>
+      <div class="product-info" style="display: flex; flex-direction: column; flex-grow: 1; padding: 15px;">
+        <div class="product-price" style="display: block !important; margin-bottom: 8px;">
+          <span class="price-main" style="color: var(--gold-dark); font-weight: 700; font-size: 18px;">₹${priceVal.toLocaleString('en-IN')}</span>
+        </div>
+        <div class="product-type" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">${categoryName}</div>
+        <h3 class="product-name" style="margin: 5px 0 15px 0;">${p.name}</h3>
+        ${isOOS
+        ? `<button class="btn-oos" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:auto;width:100%;padding:12px 16px;border:1.5px solid #b0937a;background:linear-gradient(135deg,#f5ede6,#efe4d8);color:#7a4a2a;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:4px;cursor:not-allowed;font-family:'Poppins',sans-serif;" disabled>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+              Currently Unavailable
+            </button>`
+        : `<button class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:auto;" onclick="event.stopPropagation();addToCart('${p.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+              Add to Cart
+            </button>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
 window.switchCategory = (cat) => {
   currentCategory = cat;
   document.querySelectorAll('.tab-item').forEach(tab => {
@@ -1640,6 +1738,7 @@ function renderAll() {
   renderGrid();
   renderAdminList();
   renderMarquee();
+  if (typeof renderNewArrivals === 'function') renderNewArrivals();
   // Load product page: prefer URL ?id=, fallback to sessionStorage (after refresh)
   const activeId = (typeof urlId !== 'undefined' && urlId)
     ? urlId
@@ -2927,14 +3026,15 @@ if (urlId) {
 }
 
 function initProductPage(productId) {
-  // If Server-Side Rendering provided the initial data, use it immediately!
-  if (window.__INITIAL_PRODUCT_DATA__) {
+  // First check if product is available in products array (from real-time Firestore or recent edit)
+  let p = products.find(prod => prod.id == productId || prod.slug === productId);
+
+  // If Server-Side Rendering provided initial data and product not yet found in array:
+  if (!p && window.__INITIAL_PRODUCT_DATA__) {
     let fetched = window.__INITIAL_PRODUCT_DATA__;
     if (!products.find(x => x.id == fetched.id)) products.push(fetched);
-    return _populateProductPage(fetched);
+    p = fetched;
   }
-
-  let p = products.find(prod => prod.id == productId || prod.slug === productId);
 
   // If not found locally, try fetching directly from Firestore
   if (!p) {
@@ -2969,6 +3069,192 @@ function initProductPage(productId) {
 
   _populateProductPage(p);
 }
+
+
+// ── PRODUCT CARE ENGINE ───────────────────────────────────────────────
+function escapeHtmlCare(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function getCareSummary(careText, category) {
+  if (!careText) return 'Dry Wash Only';
+  const lines = String(careText).split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const washRegex = /(wash|clean|dry\s*clean|wipe)/i;
+
+  for (const line of lines) {
+    const stripped = line.replace(/^[✦•\-\*•●\s]+/, '').replace(/^\d+[\.\)\-:]\s*/, '').trim();
+    if (/^(care|product\s*care|product\s*details|instructions?)/i.test(stripped)) continue;
+    if (washRegex.test(stripped)) {
+      let val = stripped;
+      if (stripped.includes(':')) {
+        val = stripped.split(':').slice(1).join(':').trim();
+      }
+      const clause = val.split(/[.;—]/)[0].trim();
+      if (clause.length > 0 && clause.length <= 40) return clause;
+      if (clause.length > 40) return clause.slice(0, 37) + '...';
+    }
+  }
+
+  for (const line of lines) {
+    const stripped = line.replace(/^[✦•\-\*•●\s]+/, '').replace(/^\d+[\.\)\-:]\s*/, '').trim();
+    if (/^(care|product\s*care|product\s*details|instructions?)/i.test(stripped)) continue;
+    let val = stripped.includes(':') ? stripped.split(':').slice(1).join(':').trim() : stripped;
+    const clause = val.split(/[.;—]/)[0].trim();
+    if (clause.length > 0 && clause.length <= 40) return clause;
+    if (clause.length > 40) return clause.slice(0, 37) + '...';
+  }
+
+  return 'Dry Wash Only';
+}
+
+function getCareIconSvg(title, descText) {
+  const t = (title || '').toLowerCase();
+  const d = (descText || '').toLowerCase();
+
+  // 1. Water / Moisture
+  if (t.includes('water') || t.includes('moist') || t.includes('humid') || d.includes('moisture') || d.includes('humidity')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`;
+  }
+  // 2. Wash / Soak
+  if (t.includes('wash') || t.includes('soak') || d.includes('wash') || d.includes('soak')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M2 12h20"/><path d="M20 12v4a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5v-4"/><path d="M4 12V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v6"/><path d="M9 15v2M12 14v3M15 15v2"/></svg>`;
+  }
+  // 3. Dry Clean / Sparkle / Cleaning
+  if (t.includes('clean') || t.includes('wipe') || t.includes('polish') || d.includes('dry clean') || d.includes('cleaning') || d.includes('wipe')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>`;
+  }
+  // 4. Iron / Press
+  if (t.includes('iron') || t.includes('press') || t.includes('steam') || d.includes('iron') || d.includes('press')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M4 18h16a1 1 0 0 0 1-1c0-4-3-7-7-7H4a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1z"/><path d="M6 10V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v4"/><circle cx="8" cy="15" r="1"/><circle cx="12" cy="15" r="1"/><circle cx="16" cy="15" r="1"/></svg>`;
+  }
+  // 5. Drying / Sunlight / Shade
+  if (t.includes('dry') || t.includes('shade') || t.includes('sun') || d.includes('shade') || d.includes('sunlight') || d.includes('air dry') || d.includes('tumble dry')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>`;
+  }
+  // 6. Storage / Muslin / Box
+  if (t.includes('stor') || t.includes('muslin') || t.includes('pouch') || t.includes('box') || t.includes('fold') || d.includes('muslin') || d.includes('store') || d.includes('pouch')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>`;
+  }
+  // 7. Perfume / Chemicals / Spray
+  if (t.includes('perfume') || t.includes('chemical') || t.includes('spray') || t.includes('lotion') || d.includes('perfume') || d.includes('chemical') || d.includes('hairspray')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M10 2v4M14 2v4M6 10v10a2 2 0 002 2h8a2 2 0 002-2V10a2 2 0 00-2-2H8a2 2 0 00-2 2z"/></svg>`;
+  }
+  // 8. Bleach / Harsh Detergents
+  if (t.includes('bleach') || t.includes('harsh') || d.includes('bleach') || d.includes('harsh detergent')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+  }
+  // 9. Colour / Bleed / Dye
+  if (t.includes('colour') || t.includes('color') || t.includes('bleed') || t.includes('fade') || d.includes('bleed') || d.includes('color fading') || d.includes('colour fading')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>`;
+  }
+  // 10. Material / Fabric / Silk / Zari / Organza / Saree Type
+  if (t.includes('material') || t.includes('fabric') || t.includes('silk') || t.includes('zari') || t.includes('organza') || t.includes('type') || t.includes('border') || t.includes('design')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M2 9h20M2 15h20M9 2v20M15 2v20"/></svg>`;
+  }
+  // 11. Shipment / Dispatch
+  if (t.includes('ship') || t.includes('dispatch') || t.includes('deliver') || d.includes('dispatch') || d.includes('shipment')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>`;
+  }
+  // 12. Delicate Handling / Wring / Scrub / Stone
+  if (t.includes('handl') || t.includes('wring') || t.includes('delicate') || t.includes('scrub') || t.includes('stone') || d.includes('wring') || d.includes('scrub') || d.includes('scratch')) {
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>`;
+  }
+
+  // 13. Default
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold, #c9a84c)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
+}
+
+function generateProductCareData(p) {
+  const isJewellery = (p && ((p.category && p.category.toLowerCase().includes('jewel')) || (p.name && /necklace|haaram|bangle|earring|choker|tikka|jewel/i.test(p.name))));
+  let rawText = (p && p.productCare) ? String(p.productCare).trim() : '';
+
+  if (!rawText) {
+    rawText = isJewellery
+      ? 'CARE & SAFETY\n✦ Cleaning: Wipe gently with a soft cloth after each use.\n✦ Moisture: Keep away from water, perfumes, lotions, and sprays.\n✦ Storage: Store in a zip-lock pouch or airtight box with cotton or tissue.\n✦ Handling: Avoid dropping or bending delicate handcrafted components.\n✦ Longevity: Put on jewellery last when dressing and take off first.'
+      : 'Care & Storage Instructions\nWash: Professional dry clean recommended to preserve fabric structure and zari.\nDrying: Always dry in shade away from direct sunlight. Never tumble dry.\nIroning: Iron on low or silk heat setting with a protective cloth on the reverse side.\nStorage: Fold neatly and wrap in breathable muslin or cotton cloth.\nHandling: Avoid harsh scrubbing or direct contact with perfumes and moisture.';
+  }
+
+  const lines = rawText.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  let headerTitle = 'Product Care Essentials';
+  const headerRegex = /^(care(\s*(&|and)\s*(storage|safety))?(\s*instructions?)?|product\s*care(\s*instructions?)?|care\s*instructions?|product\s*details|instructions?)$/i;
+
+  let itemsToProcess = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const stripped = line.replace(/^[✦•\-\*•●\s]+/, '').replace(/[:\s]+$/, '').trim();
+    if (i === 0 && headerRegex.test(stripped)) {
+      headerTitle = stripped;
+      continue;
+    }
+    if (headerRegex.test(stripped)) continue;
+    itemsToProcess.push(line);
+  }
+
+  if (itemsToProcess.length === 1 && !itemsToProcess[0].includes(':')) {
+    const single = itemsToProcess[0];
+    const splitSentences = single.split(/(?<=[.!?])\s+(?=[A-Z0-9✦•\-\*])/).map(s => s.trim()).filter(Boolean);
+    if (splitSentences.length > 1) {
+      itemsToProcess = splitSentences;
+    }
+  }
+
+  let cardsHtml = '';
+  itemsToProcess.forEach(item => {
+    let clean = item.replace(/^[✦•\-\*•●]\s*/, '').replace(/^\d+[\.\)\-:]\s*/, '').trim();
+    if (!clean) return;
+
+    let title = 'Care Tip';
+    let descText = clean;
+
+    const colonIdx = clean.indexOf(':');
+    if (colonIdx > 0 && colonIdx <= 35) {
+      title = clean.substring(0, colonIdx).trim();
+      descText = clean.substring(colonIdx + 1).trim();
+      if (!descText) {
+        descText = title;
+        title = 'Care Tip';
+      }
+    } else {
+      const lower = clean.toLowerCase();
+      if (lower.includes('dry clean')) title = 'Dry Clean';
+      else if (lower.includes('machine wash')) title = 'Machine Wash';
+      else if (lower.includes('hand wash')) title = 'Hand Wash';
+      else if (lower.includes('wash') || lower.includes('soak')) title = 'Wash Care';
+      else if (lower.includes('iron') || lower.includes('press') || lower.includes('steam')) title = 'Ironing';
+      else if (lower.includes('sun') || lower.includes('shade') || lower.includes('drying') || lower.includes('dry')) title = 'Drying';
+      else if (lower.includes('stor') || lower.includes('muslin') || lower.includes('pouch') || lower.includes('box') || lower.includes('fold')) title = 'Storage';
+      else if (lower.includes('water') || lower.includes('moisture') || lower.includes('humidity')) title = 'Moisture Care';
+      else if (lower.includes('perfume') || lower.includes('chemical') || lower.includes('spray') || lower.includes('lotion')) title = 'Protection';
+      else if (lower.includes('bleach') || lower.includes('harsh')) title = 'Detergent & Bleach';
+      else if (lower.includes('colour') || lower.includes('color') || lower.includes('bleed') || lower.includes('fade')) title = 'Colour Care';
+      else if (lower.includes('handl') || lower.includes('wring') || lower.includes('delicate') || lower.includes('scrub')) title = 'Delicate Handling';
+      else if (lower.includes('longevity') || lower.includes('maintain') || lower.includes('polish')) title = 'Longevity Tip';
+    }
+
+    const iconSvg = getCareIconSvg(title, descText);
+
+    cardsHtml += `
+      <div class="care-card-item">
+        <div class="care-card-header">
+          <div class="care-card-icon">
+             ${iconSvg}
+          </div>
+          <div class="care-card-title">${escapeHtmlCare(title)}</div>
+        </div>
+        <div class="care-card-desc">${escapeHtmlCare(descText)}</div>
+      </div>
+    `;
+  });
+
+  const html = `<div class="care-grid">${cardsHtml}</div>`;
+  return { headerTitle, html };
+}
+// ─────────────────────────────────────────────────────────────────────
 
 function _populateProductPage(p) {
 
@@ -3083,21 +3369,22 @@ function _populateProductPage(p) {
   if (price) price.innerText = `₹${(extractPriceFromDesc(p.description) || p.price || 0).toLocaleString('en-IN')}`;
 
   if (desc) {
-    const descText = p.description || "Exquisite premium collection from ROKEA by RK.";
-    const descLines = descText.split('\n').filter(line => line.trim().length > 0).map(l => l.replace(/^[✦•\-\*]\s*/, '').trim());
-    
-    // Filter out "Why You'll Love It" and styling tips if present in description text
-    const filteredLines = descLines.filter(line => {
-      const lower = line.toLowerCase();
-      return !lower.includes('why you') && 
-             !lower.includes('pair with gold jewellery') && 
-             !lower.includes('style as bridal wear');
-    });
-    
-    let prodDesc = filteredLines.length > 0 ? filteredLines.join('<br><br>') : descText;
-    
-    let color = p.color || "As shown";
-    let occasion = p.occasion || "Wedding, Festival & Traditional Wear";
+    // Preserve exact description entered in Admin Panel without filtering or deleting lines
+    const descRaw = (p.description && p.description.trim()) ? p.description.trim() : "Exquisite premium collection from ROKEA by RK.";
+    const prodDesc = descRaw.replace(/\r\n/g, '\n').replace(/\n/g, '<br>');
+
+    let color = p.color || "";
+    if (!color) {
+      const colMatch = ((p.description || '') + '\n' + (p.productCare || '')).match(/(?:colou?r)\s*:\s*([^\r\n,;]+)/i);
+      color = colMatch ? colMatch[1].trim() : "As shown";
+    }
+
+    let occasion = p.occasion || "";
+    if (!occasion) {
+      const occMatch = ((p.description || '') + '\n' + (p.productCare || '')).match(/occasion\s*:\s*([^\r\n;]+)/i);
+      occasion = occMatch ? occMatch[1].trim() : "Wedding, Festival & Traditional Wear";
+    }
+
     let type = p.category || "Soft Silk Saree";
 
     desc.innerHTML = `
@@ -3136,7 +3423,7 @@ function _populateProductPage(p) {
               <div class="detail-item">
                   <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div>
                   <div class="detail-label">Care</div>
-                  <div class="detail-value">: Dry Wash Only</div>
+                  <div class="detail-value">: ${getCareSummary(p.productCare, p.category)}</div>
               </div>
           </div>
       </div>
@@ -3144,47 +3431,12 @@ function _populateProductPage(p) {
   }
 
   if (care) {
-    const careText = p.productCare || "Handle with care to maintain the longevity of this premium piece.";
-    const items = careText.split('\n').filter(line => line.trim().length > 0);
-
-    let html = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 15px; margin-top: 10px;">`;
-
-    items.forEach(item => {
-      const text = item.replace(/^[✦•\-\*]\s*/, '').trim();
-      if (text === "CARE & SAFETY") return;
-
-      let title = "Care Tip";
-      let descText = text;
-
-      if (text.includes(':')) {
-        const parts = text.split(':');
-        title = parts[0].trim();
-        descText = parts.slice(1).join(':').trim();
-      }
-
-      let iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>`;
-      if (title.toLowerCase().includes('clean')) iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>`;
-      if (title.toLowerCase().includes('water') || title.toLowerCase().includes('moisture')) iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>`;
-      if (title.toLowerCase().includes('stor')) iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>`;
-      if (title.toLowerCase().includes('perfume') || title.toLowerCase().includes('chemical')) iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M10 2v4M14 2v4M6 10v10a2 2 0 002 2h8a2 2 0 002-2V10a2 2 0 00-2-2H8a2 2 0 00-2 2z"/></svg>`;
-      if (title.toLowerCase().includes('handl')) iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><path d="M18 8h1a4 4 0 0 1 0 8h-1"></path><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path><line x1="6" y1="1" x2="6" y2="4"></line><line x1="10" y1="1" x2="10" y2="4"></line><line x1="14" y1="1" x2="14" y2="4"></line></svg>`;
-      if (title.toLowerCase().includes('longevity') || title.toLowerCase().includes('tip')) iconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="width:18px; height:18px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`;
-
-      html += `
-        <div style="background: rgba(255,255,255,0.7); border: 1px solid rgba(201,168,76,0.15); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 10px; transition: transform 0.3s, box-shadow 0.3s; cursor: default;" onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 5px 15px rgba(201,168,76,0.1)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 2px;">
-            <div style="background: rgba(201,168,76,0.1); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: inset 0 0 10px rgba(201,168,76,0.05);">
-               ${iconSvg}
-            </div>
-            <div style="font-family: 'Playfair Display', serif; font-weight: 600; font-size: 15px; color: var(--dark); letter-spacing: 0.3px;">${title}</div>
-          </div>
-          <div style="font-size: 13px; line-height: 1.6; color: var(--text);">${descText}</div>
-        </div>
-      `;
-    });
-
-    html += `</div>`;
-    care.innerHTML = html;
+    const careResult = generateProductCareData(p);
+    care.innerHTML = careResult.html;
+    const careTitleEl = document.getElementById('careBoxTitle');
+    if (careTitleEl && careResult.headerTitle) {
+      careTitleEl.innerText = careResult.headerTitle;
+    }
   }
 
   if (stock) {
