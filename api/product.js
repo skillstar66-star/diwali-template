@@ -53,6 +53,33 @@ async function getProductBySlugOrId(slug) {
       return data;
     }
 
+    // Fallback: try by aliases array contains slug
+    const aliasQuery = {
+      structuredQuery: {
+        from: [{ collectionId: 'products' }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: 'aliases' },
+            op: 'ARRAY_CONTAINS',
+            value: { stringValue: slug }
+          }
+        },
+        limit: 1
+      }
+    };
+    const aliasRes = await fetch(`https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents:runQuery`, {
+      method: 'POST',
+      body: JSON.stringify(aliasQuery),
+      headers: { 'Content-Type': 'application/json' }
+    });
+    const aliasResult = await aliasRes.json();
+    if (aliasResult && aliasResult.length > 0 && aliasResult[0].document) {
+      const doc = aliasResult[0].document;
+      const data = unwrapFirestoreData(doc.fields);
+      data.id = doc.name.split('/').pop();
+      return data;
+    }
+
     // Fallback: try by document ID
     const docRes = await fetch(`https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents/products/${slug}`);
     if (docRes.ok) {

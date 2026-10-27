@@ -677,7 +677,7 @@ window.handleForgotPassword = () => {
   }
 
   if (!email) {
-    email = prompt("Enter your registered email to receive a password reset link:");
+    email = prompt("Please enter your registered email address to receive a password reset link:");
     if (!email) return;
     email = email.trim();
     if (forgotEmailInput) forgotEmailInput.value = email;
@@ -685,7 +685,7 @@ window.handleForgotPassword = () => {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
-    alert("Please enter a valid email address (e.g., yourname@gmail.com).");
+    alert("Please enter a valid email address (e.g., name@domain.com).");
     if (forgotEmailInput) forgotEmailInput.focus();
     return;
   }
@@ -700,7 +700,7 @@ window.handleForgotPassword = () => {
   }
 
   if (!window.firebase || !firebase.auth) {
-    alert("Authentication service is loading. Please check your internet connection and try again.");
+    alert("Authentication service is currently initializing. Please check your internet connection and try again.");
     if (submitBtn) {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalBtnHtml;
@@ -711,15 +711,21 @@ window.handleForgotPassword = () => {
   firebase.auth().sendPasswordResetEmail(email)
     .then(() => {
       const successHtml = `
-        <div style="background: rgba(46, 125, 50, 0.25); border: 1.5px solid #4caf50; color: #c8e6c9; padding: 14px; border-radius: 8px; font-size: 12.5px; line-height: 1.6;">
-          <strong style="color: #a5d6a7; font-size: 14px;">✓ Password Reset Email Sent!</strong><br>
-          We have sent a reset link to: <strong>${email}</strong><br><br>
-          <div style="background: rgba(255, 193, 7, 0.2); border: 1px solid #ffd54f; color: #fff9c4; padding: 10px; border-radius: 6px;">
-            ⚠️ <strong>MAIL VARALAIYA?</strong><br>
-            Gmail-la <strong>Spam / Junk</strong> folder kulla check pannunga! Firebase default server moolam varuvathala, 99% reset mail <strong>Spam folder</strong>-ku thaan pogum.
+        <div style="background: rgba(46, 125, 50, 0.2); border: 1.5px solid #4caf50; color: #e8f5e9; padding: 16px; border-radius: 10px; font-size: 13px; line-height: 1.6; text-align: left;">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <span style="font-size: 16px; color: #81c784;">✓</span>
+            <strong style="color: #a5d6a7; font-size: 14px; letter-spacing: 0.5px;">Password Reset Link Sent!</strong>
           </div>
-          <div style="margin-top: 10px; text-align: center;">
-            <a href="https://mail.google.com/mail/u/0/#spam" target="_blank" style="color: #ffd700; font-weight: 700; text-decoration: underline;">Open Gmail Spam Folder &rarr;</a>
+          <p style="margin: 0 0 10px 0; color: #c8e6c9; font-size: 12.5px;">
+            We have sent a secure password reset link to: <strong style="color: #ffffff;">${email}</strong>
+          </p>
+          <div style="background: rgba(255, 255, 255, 0.08); border-left: 3px solid #ffd700; padding: 10px 12px; border-radius: 4px; font-size: 11.5px; color: #fff8e1; margin-bottom: 12px;">
+            ✉️ Please check your <strong>Inbox</strong>. If you do not see it within a few moments, kindly check your <strong>Spam or Junk</strong> folder as a precaution.
+          </div>
+          <div style="text-align: center;">
+            <a href="https://mail.google.com" target="_blank" style="display: inline-flex; align-items: center; gap: 6px; background: #2e7d32; color: #ffffff; font-weight: 600; padding: 8px 18px; border-radius: 50px; text-decoration: none; font-size: 12px; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(0,0,0,0.25);">
+              <i class="fas fa-envelope-open-text"></i> Open Your Email &rarr;
+            </a>
           </div>
         </div>
       `;
@@ -728,20 +734,20 @@ window.handleForgotPassword = () => {
         statusMsg.style.display = 'block';
       }
       if (submitBtn) {
-        submitBtn.innerHTML = 'Link Sent! Check Spam Folder ✓';
+        submitBtn.innerHTML = 'Reset Link Sent ✓';
         submitBtn.style.background = '#2e7d32';
       }
-      alert("Password reset link sent to " + email + "!\n\n⚠️ IMPORTANT: Mail inbox-la illana kandippa SPAM / JUNK folder kulla check pannunga!");
+      alert("A password reset link has been sent to " + email + ".\n\nPlease check your inbox (or spam/junk folder) to complete your password reset.");
     })
     .catch((error) => {
       console.error("Firebase sendPasswordResetEmail error:", error);
       let errMsg = error.message;
       if (error.code === 'auth/user-not-found') {
-        errMsg = "Intha email-la account illa. Please check spelling or click Register to create a new account.";
+        errMsg = "No account found with this email address. Please verify your email or sign up for a new account.";
       } else if (error.code === 'auth/invalid-email') {
-        errMsg = "The email address is not properly formatted.";
+        errMsg = "The email address entered is not valid. Please check and try again.";
       } else if (error.code === 'auth/too-many-requests') {
-        errMsg = "Too many reset attempts recently. Please wait a few minutes before trying again.";
+        errMsg = "Too many reset attempts have been made recently. Please wait a few minutes before trying again.";
       }
       if (statusMsg) {
         statusMsg.innerHTML = `
@@ -763,6 +769,7 @@ window.handleForgotPassword = () => {
       }
     });
 };
+
 window.togglePassVisibility = (inputId, iconEl) => {
   const inp = document.getElementById(inputId);
   if (!inp) return;
@@ -3057,7 +3064,16 @@ function initProductPage(productId) {
                 if (!products.find(x => x.id == fetched.id)) products.push(fetched);
                 _populateProductPage(fetched);
               } else {
-                console.warn('Product not found in Firestore:', productId);
+                return db.collection('products').where('aliases', 'array-contains', productId).get().then(aliasSnap => {
+                  if (!aliasSnap.empty) {
+                    let fetched = aliasSnap.docs[0].data();
+                    fetched.id = fetched.id || aliasSnap.docs[0].id;
+                    if (!products.find(x => x.id == fetched.id)) products.push(fetched);
+                    _populateProductPage(fetched);
+                  } else {
+                    console.warn('Product not found in Firestore:', productId);
+                  }
+                });
               }
             });
           }
