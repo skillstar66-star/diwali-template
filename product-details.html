@@ -293,7 +293,7 @@
 
         .detail-item {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 10px;
             font-size: 13px;
         }
@@ -306,6 +306,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            margin-top: 2px;
         }
 
         .detail-icon svg {
@@ -316,12 +317,21 @@
         .detail-label {
             font-weight: 600;
             color: #333;
-            width: 75px;
+            min-width: 90px;
             flex-shrink: 0;
         }
 
         .detail-value {
             color: #555;
+            line-height: 1.45;
+            word-break: break-word;
+        }
+
+        @media (max-width: 768px) {
+            .details-grid {
+                grid-template-columns: 1fr;
+                row-gap: 12px;
+            }
         }
 
         .shop-banner {
@@ -803,7 +813,8 @@
                     <div class="content-card">
                         <div id="detailDesc" class="desc-content">
                             <div id="descBody">
-                                <!-- Description Content -->
+                                <!-- Box 1: Product Description -->
+                                <!-- Box 2: Product Details -->
                             </div>
                         </div>
 

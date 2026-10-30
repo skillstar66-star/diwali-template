@@ -136,6 +136,172 @@ function getCareSummary(careText, category) {
   return 'Dry Wash Only';
 }
 
+function getDetailIconSvg(label) {
+  const l = (label || '').toLowerCase();
+  if (l.includes('type') || l.includes('name')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path></svg>';
+  }
+  if (l.includes('colour') || l.includes('color')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path></svg>';
+  }
+  if (l.includes('design') || l.includes('motif')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>';
+  }
+  if (l.includes('stone') || l.includes('gem')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="6 3 18 3 22 9 12 22 2 9"></polygon></svg>';
+  }
+  if (l.includes('set') || l.includes('includes') || l.includes('package')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>';
+  }
+  if (l.includes('style')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path></svg>';
+  }
+  if (l.includes('ideal') || l.includes('gender') || l.includes('for')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+  }
+  if (l.includes('occasion')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
+  }
+  if (l.includes('pair')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>';
+  }
+  if (l.includes('material') || l.includes('finish')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>';
+  }
+  if (l.includes('ship') || l.includes('dispatch') || l.includes('delivery')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>';
+  }
+  if (l.includes('care')) {
+    return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>';
+  }
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
+}
+
+function generateProductDetailsGridHtml(p) {
+  let details = [];
+
+  if (p.productDetails) {
+    const lines = String(p.productDetails).split(/\r?\n/);
+    lines.forEach(line => {
+      const m = line.match(/^([^:]+):\s*(.+)$/);
+      if (m) {
+        details.push({
+          label: m[1].trim(),
+          value: m[2].trim()
+        });
+      }
+    });
+  } else if (p.details && typeof p.details === 'object' && Object.keys(p.details).length > 0) {
+    Object.keys(p.details).forEach(k => {
+      details.push({ label: k, value: p.details[k] });
+    });
+  } else if (p.description && /\bproduct\s+details\b/i.test(p.description)) {
+    const m = p.description.match(/\bproduct\s+details\b/i);
+    const sec = p.description.substring(m.index + m[0].length).trim();
+    sec.split(/\r?\n/).forEach(line => {
+      const match = line.match(/^([^:]+):\s*(.+)$/);
+      if (match) details.push({ label: match[1].trim(), value: match[2].trim() });
+    });
+  }
+
+  let gridItemsHtml = '';
+  if (details.length > 0) {
+    gridItemsHtml = details.map(item => `
+      <div class="detail-item">
+          <div class="detail-icon">${getDetailIconSvg(item.label)}</div>
+          <div class="detail-label">${item.label}</div>
+          <div class="detail-value">: ${item.value}</div>
+      </div>
+    `).join('');
+
+    const hasCare = details.some(d => d.label.toLowerCase().includes('care'));
+    if (!hasCare) {
+      gridItemsHtml += `
+        <div class="detail-item">
+            <div class="detail-icon">${getDetailIconSvg('care')}</div>
+            <div class="detail-label">Care</div>
+            <div class="detail-value">: ${getCareSummary(p.productCare, p.category)}</div>
+        </div>
+      `;
+    }
+  } else {
+    // Saree or legacy fallback
+    let color = p.color || "";
+    if (!color) {
+      const colMatch = ((p.description || '') + '\n' + (p.productCare || '')).match(/(?:colou?r)\s*:\s*([^\r\n,;]+)/i);
+      color = colMatch ? colMatch[1].trim() : "As shown";
+    }
+
+    let occasion = p.occasion || "";
+    if (!occasion) {
+      const occMatch = ((p.description || '') + '\n' + (p.productCare || '')).match(/occasion\s*:\s*([^\r\n;]+)/i);
+      occasion = occMatch ? occMatch[1].trim() : "Wedding, Festival & Traditional Wear";
+    }
+
+    let type = p.productType || p.category || "Soft Silk Saree";
+
+    gridItemsHtml = `
+      <div class="detail-item">
+          <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"></path></svg></div>
+          <div class="detail-label">Type</div>
+          <div class="detail-value">: ${type}</div>
+      </div>
+      <div class="detail-item">
+          <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path></svg></div>
+          <div class="detail-label">Style</div>
+          <div class="detail-value">: ${p.style || "Traditional Indian"}</div>
+      </div>
+      <div class="detail-item">
+          <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path></svg></div>
+          <div class="detail-label">Colour</div>
+          <div class="detail-value">: ${color}</div>
+      </div>
+      <div class="detail-item">
+          <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
+          <div class="detail-label">Ideal For</div>
+          <div class="detail-value">: ${p.idealFor || "Women"}</div>
+      </div>
+      <div class="detail-item">
+          <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
+          <div class="detail-label">Occasion</div>
+          <div class="detail-value">: ${occasion}</div>
+      </div>
+      <div class="detail-item">
+          <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg></div>
+          <div class="detail-label">Care</div>
+          <div class="detail-value">: ${getCareSummary(p.productCare, p.category)}</div>
+      </div>
+    `;
+  }
+
+  return gridItemsHtml;
+}
+
+function renderFullProductDescHtml(p) {
+  let cleanDesc = (p.description || '').trim();
+  cleanDesc = cleanDesc.replace(/^\bproduct\s+description\s*:?\s*/i, '').trim();
+  const detailsIdx = cleanDesc.search(/\bproduct\s+details\b/i);
+  if (detailsIdx !== -1) {
+    cleanDesc = cleanDesc.substring(0, detailsIdx).trim();
+  }
+  const cleanDescHtml = cleanDesc.replace(/\r\n/g, '\n').replace(/\n/g, '<br>');
+
+  const gridHtml = generateProductDetailsGridHtml(p);
+
+  return `
+    <div class="info-box">
+        <div class="info-box-title">Product Description</div>
+        <div class="info-box-text">${cleanDescHtml || 'Exquisite premium collection from ROKEA by RK.'}</div>
+    </div>
+    <div class="info-box">
+        <div class="info-box-title">Product Details</div>
+        <div class="details-grid">
+            ${gridHtml}
+        </div>
+    </div>
+  `;
+}
+
 function getCareIconSvg(title, descText) {
   const t = (title || '').toLowerCase();
   const d = (descText || '').toLowerCase();
@@ -456,12 +622,10 @@ module.exports = async function handler(req, res) {
     html = html.replace(/<div class="img-skeleton" id="imgSkeleton">/g, '<div class="img-skeleton hide" id="imgSkeleton" style="display:none;">');
     html = html.replace(/id="detailMainImg"/, `id="detailMainImg" src="${productImg}" class="img-loaded"`);
   }
-  if (p.description) {
-    const formattedDesc = p.description.trim().replace(/\r\n/g, '\n').replace(/\n/g, '<br>');
-    html = html.replace(/<div id="descBody">[\s\S]*?<\/div>/, `<div id="descBody"><div class="info-box"><div class="info-box-title">Product Description</div><div class="info-box-text">${formattedDesc}</div></div></div>`);
+  if (p.description || p.productDetails || p.details) {
+    html = html.replace(/<div id="descBody">[\s\S]*?<\/div>/, `<div id="descBody">${renderFullProductDescHtml(p)}</div>`);
   }
-
-  // Pre-render Care section into SSR HTML
+// Pre-render Care section into SSR HTML
   const careResult = generateProductCareData(p);
   if (careResult && careResult.html) {
     html = html.replace(/<div id="careBody">[\s\S]*?<\/div>/, `<div id="careBody">${careResult.html}</div>`);
