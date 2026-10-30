@@ -4432,7 +4432,6 @@ window.openAppointmentModal = (e) => {
     // If not found in DOM, dynamically inject it so it works on any page
     const modalWrapper = document.createElement('div');
     modalWrapper.id = 'appointmentModal';
-    modalWrapper.className = 'modal';
     modalWrapper.innerHTML = `
       <div class="appointment-modal-content" onclick="event.stopPropagation()">
         <span class="modal-close" onclick="closeAppointmentModal(event)">&times;</span>
@@ -4514,13 +4513,21 @@ window.openAppointmentModal = (e) => {
   if (card) card.scrollTop = 0;
 
   modal.style.display = 'flex';
-  void modal.offsetWidth; // Force synchronous layout reflow so display:flex is painted
+  void modal.offsetWidth; // Force synchronous reflow so display:flex is painted
   modal.classList.add('active');
   document.body.classList.add('modal-open');
 };
 
 window.closeAppointmentModal = (e) => {
-  if (e && e.stopPropagation) e.stopPropagation();
+  if (e) {
+    if (e.stopPropagation) e.stopPropagation();
+    const modal = document.getElementById('appointmentModal');
+    const content = modal ? modal.querySelector('.appointment-modal-content') : null;
+    // Safety check: clicking inside form content NEVER closes it
+    if (e.target && content && content.contains(e.target) && !e.target.classList.contains('modal-close')) {
+      return;
+    }
+  }
   const modal = document.getElementById('appointmentModal');
   if (modal) {
     modal.classList.remove('active');

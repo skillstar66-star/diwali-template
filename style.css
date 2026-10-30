@@ -244,13 +244,12 @@ nav {
   cursor: pointer;
   font-family: 'Poppins', sans-serif;
   font-weight: 600;
-  transition: all 0.3s ease;
+  transition: background-color 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
 }
 
 .nav-cta:hover {
   background: var(--gold-light);
-  transform: scale(1.05);
-  box-shadow: 0 5px 15px rgba(201, 168, 76, 0.3);
+  box-shadow: 0 4px 15px rgba(201, 168, 76, 0.4);
 }
 
 .menu-toggle,
@@ -6895,17 +6894,13 @@ img {
   border: 1px solid rgba(212, 175, 55, 0.2) !important;
   box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45) !important;
   position: relative !important;
-  max-height: 90vh !important;
+  max-height: 92vh !important;
   overflow-y: auto !important;
+  overflow-x: hidden !important;
+  scrollbar-gutter: stable !important;
   box-sizing: border-box !important;
-  transform: translateY(12px) !important;
-  transform-origin: center center !important;
   -webkit-font-smoothing: antialiased !important;
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
-}
-
-#appointmentModal.active .appointment-modal-content {
-  transform: translateY(0) !important;
+  /* Stationary card: 0 motion jitter on hover or cursor placement */
 }
 
 #appointmentModal .appointment-modal-content::-webkit-scrollbar {
@@ -6933,13 +6928,12 @@ img {
   cursor: pointer !important;
   line-height: 1 !important;
   z-index: 10 !important;
-  transition: transform 0.2s ease, color 0.2s ease !important;
+  transition: color 0.2s ease !important;
   padding: 4px !important;
 }
 
 #appointmentModal .modal-close:hover {
   color: #C9A84C !important;
-  transform: scale(1.15) !important;
 }
 
 /* Header */
@@ -7126,19 +7120,19 @@ img {
   justify-content: center !important;
   gap: 8px !important;
   margin-top: 14px !important;
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease !important;
   box-shadow: 0 4px 14px rgba(24, 17, 9, 0.25) !important;
 }
 
 .appo-submit-btn:hover {
   background: #000000 !important;
   color: #FFFFFF !important;
-  transform: translateY(-1px) !important;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
 .appo-btn-arrow {
   font-size: 15px !important;
+  display: inline-block !important;
   transition: transform 0.2s ease !important;
 }
 
