@@ -4492,6 +4492,7 @@ window.openAppointmentModal = () => {
     if (!dateInput.value) dateInput.value = today;
   }
 
+  modal.classList.add('active');
   modal.style.display = 'flex';
   document.body.classList.add('modal-open');
 };
@@ -4499,6 +4500,7 @@ window.openAppointmentModal = () => {
 window.closeAppointmentModal = () => {
   const modal = document.getElementById('appointmentModal');
   if (modal) {
+    modal.classList.remove('active');
     modal.style.display = 'none';
     document.body.classList.remove('modal-open');
   }
