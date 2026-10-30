@@ -323,30 +323,55 @@ function addToCart(productId) {
   if (!currentUser) { openAuth(); return; }
   const p = products.find(prod => prod.id == productId);
   if (!p || p.stock === "Out of Stock") return;
-  cart.push(p);
-  localStorage.setItem('saforio_cart', JSON.stringify(cart));
-  updateCartIcon();
 
-  // Amazon-style button change if event exists
-  if (window.event && window.event.currentTarget && window.event.currentTarget.tagName === 'BUTTON') {
-    const btn = window.event.currentTarget;
-    const originalText = btn.innerHTML;
-    btn.classList.add('added');
-    btn.innerHTML = 'Added';
-    setTimeout(() => {
-      btn.classList.remove('added');
-      btn.innerHTML = originalText;
-    }, 3000);
+  const alreadyInCart = cart.some(item => item.id == p.id);
+  if (!alreadyInCart) {
+    cart.push(p);
+    localStorage.setItem('saforio_cart', JSON.stringify(cart));
+    updateCartIcon();
+    showSideNotification(p);
   }
 
-  showSideNotification(p);
+  // Update all buttons for this product to Added and stay Added permanently
+  document.querySelectorAll(`button[onclick*="addToCart('${productId}')"]`).forEach(b => {
+    b.classList.add('added');
+    b.innerHTML = 'Added';
+  });
+
+  if (window.event && window.event.currentTarget && window.event.currentTarget.tagName === 'BUTTON') {
+    const btn = window.event.currentTarget;
+    btn.classList.add('added');
+    btn.innerHTML = 'Added';
+  }
+
+  const detailBtn = document.getElementById('detailAddToCartBtn');
+  if (detailBtn && p && window.location.href.includes(p.id)) {
+    detailBtn.classList.add('added');
+    detailBtn.innerHTML = 'Added';
+  }
 }
 
 function removeFromCart(index) {
+  const removedItem = cart[index];
   cart.splice(index, 1);
   localStorage.setItem('saforio_cart', JSON.stringify(cart));
   renderCart();
   updateCartIcon();
+
+  if (removedItem) {
+    const stillInCart = cart.some(item => item.id == removedItem.id);
+    if (!stillInCart) {
+      document.querySelectorAll(`button[onclick*="addToCart('${removedItem.id}')"]`).forEach(b => {
+        b.classList.remove('added');
+        b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg> Add to Cart`;
+      });
+      const detailBtn = document.getElementById('detailAddToCartBtn');
+      if (detailBtn) {
+        detailBtn.classList.remove('added');
+        detailBtn.innerText = 'Add to Cart';
+      }
+    }
+  }
 }
 
 function updateCartIcon() {
@@ -1499,6 +1524,10 @@ function renderGrid() {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
               Currently Unavailable
             </button>`
+        : (cart && cart.some(item => item.id == p.id))
+        ? `<button class="btn-primary added" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:auto;" onclick="event.stopPropagation();addToCart('${p.id}')">
+              Added
+            </button>`
         : `<button class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:auto;" onclick="event.stopPropagation();addToCart('${p.id}')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
               Add to Cart
@@ -1595,6 +1624,10 @@ function renderNewArrivals() {
         ? `<button class="btn-oos" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:auto;width:100%;padding:12px 16px;border:1.5px solid #b0937a;background:linear-gradient(135deg,#f5ede6,#efe4d8);color:#7a4a2a;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:4px;cursor:not-allowed;font-family:'Poppins',sans-serif;" disabled>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
               Currently Unavailable
+            </button>`
+        : (cart && cart.some(item => item.id == p.id))
+        ? `<button class="btn-primary added" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:auto;" onclick="event.stopPropagation();addToCart('${p.id}')">
+              Added
             </button>`
         : `<button class="btn-primary" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:auto;" onclick="event.stopPropagation();addToCart('${p.id}')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
@@ -3466,33 +3499,38 @@ function _populateProductPage(p) {
   } else {
     if (btn) {
       btn.disabled = false;
-      btn.innerText = 'Add to Cart';
+      const inCart = cart && cart.some(item => item.id == p.id);
+      if (inCart) {
+        btn.classList.add('added');
+        btn.innerHTML = 'Added';
+      } else {
+        btn.classList.remove('added');
+        btn.innerText = 'Add to Cart';
+      }
+
       btn.onclick = () => {
         if (!currentUser) { openAuth(); return; }
-        for (let i = 0; i < currentQty; i++) cart.push(p);
-        localStorage.setItem('saforio_cart', JSON.stringify(cart));
-        updateCartIcon();
-
-        // Amazon-style button change
-        const originalText = btn.innerHTML;
+        const alreadyInCart = cart.some(item => item.id == p.id);
+        if (!alreadyInCart) {
+          cart.push(p);
+          localStorage.setItem('saforio_cart', JSON.stringify(cart));
+          updateCartIcon();
+          showSideNotification(p);
+        }
         btn.classList.add('added');
-        btn.innerHTML = 'Added to Cart';
-
-        showSideNotification(p);
-
-        setTimeout(() => {
-          btn.classList.remove('added');
-          btn.innerHTML = originalText;
-        }, 3000);
+        btn.innerHTML = 'Added';
       };
     }
     if (buyBtn) {
       buyBtn.disabled = false;
       buyBtn.onclick = () => {
         if (!currentUser) { openAuth(); return; }
-        for (let i = 0; i < currentQty; i++) cart.push(p);
-        localStorage.setItem('saforio_cart', JSON.stringify(cart));
-        updateCartIcon();
+        const alreadyInCart = cart.some(item => item.id == p.id);
+        if (!alreadyInCart) {
+          cart.push(p);
+          localStorage.setItem('saforio_cart', JSON.stringify(cart));
+          updateCartIcon();
+        }
         showToast("Preparing Checkout...", "info", p.name);
         openCheckout();
       };
@@ -4449,8 +4487,14 @@ window.openAppointmentModal = () => {
     if (!dateInput.value) dateInput.value = today;
   }
 
-  modal.classList.add('active');
+  // Reset scroll to top cleanly
+  const card = modal.querySelector('.appointment-modal-content');
+  if (card) card.scrollTop = 0;
+
   modal.style.display = 'flex';
+  // Force reflow for silky smooth 60fps GPU transition without blink
+  void modal.offsetWidth;
+  modal.classList.add('active');
   document.body.classList.add('modal-open');
 };
 
@@ -4458,7 +4502,11 @@ window.closeAppointmentModal = () => {
   const modal = document.getElementById('appointmentModal');
   if (modal) {
     modal.classList.remove('active');
-    modal.style.display = 'none';
+    setTimeout(() => {
+      if (!modal.classList.contains('active')) {
+        modal.style.display = 'none';
+      }
+    }, 300);
     document.body.classList.remove('modal-open');
   }
 };

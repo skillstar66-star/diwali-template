@@ -5510,13 +5510,16 @@ td {
 
 /* Amazon-style Button States */
 .btn-primary.added {
-  background: #4CAF50 !important;
-  border-color: #4CAF50 !important;
-  pointer-events: none;
+  background: #2e7d32 !important;
+  border-color: #2e7d32 !important;
+  color: #ffffff !important;
+  pointer-events: none !important;
+  cursor: default !important;
 }
 
 .btn-primary.added::before {
-  content: "? ";
+  content: "\2713\0020" !important;
+  font-weight: 700 !important;
 }
 
 @media (max-width: 480px) {
@@ -6863,19 +6866,26 @@ img {
    ======================================================== */
 #appointmentModal {
   z-index: 99999 !important;
-  display: none;
-  position: fixed;
-  inset: 0;
+  position: fixed !important;
+  inset: 0 !important;
   background: rgba(15, 10, 6, 0.72) !important;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  transition: opacity 0.28s ease, visibility 0.28s ease !important;
+  padding: 16px !important;
+  box-sizing: border-box !important;
 }
 
-#appointmentModal.active,
-#appointmentModal[style*="display: flex"] {
-  display: flex !important;
+#appointmentModal.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
 }
 
 #appointmentModal .appointment-modal-content {
@@ -6885,23 +6895,23 @@ img {
   border-radius: 24px !important;
   padding: 36px 36px 32px !important;
   border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.38) !important;
   position: relative !important;
-  max-height: 92vh !important;
+  max-height: 90vh !important;
   overflow-y: auto !important;
   box-sizing: border-box !important;
-  animation: appoPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards !important;
+  /* Initial state: zero opacity, slightly scaled down - 100% flicker-free */
+  opacity: 0 !important;
+  transform: scale(0.95) translateY(10px) !important;
+  transform-origin: center center !important;
+  will-change: transform, opacity !important;
+  -webkit-font-smoothing: antialiased !important;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease !important;
 }
 
-@keyframes appoPopIn {
-  from {
-    opacity: 0;
-    transform: scale(0.93) translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
+#appointmentModal.active .appointment-modal-content {
+  opacity: 1 !important;
+  transform: scale(1) translateY(0) !important;
 }
 
 #appointmentModal .modal-close {
