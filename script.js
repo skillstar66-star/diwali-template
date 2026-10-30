@@ -4512,10 +4512,13 @@ window.openAppointmentModal = () => {
   const card = modal.querySelector('.appointment-modal-content');
   if (card) card.scrollTop = 0;
 
+  modal.classList.add('is-open');
   modal.style.display = 'flex';
-  // Force reflow for silky smooth 60fps GPU transition without blink
-  void modal.offsetWidth;
-  modal.classList.add('active');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      modal.classList.add('active');
+    });
+  });
   document.body.classList.add('modal-open');
 };
 
@@ -4525,10 +4528,11 @@ window.closeAppointmentModal = () => {
     modal.classList.remove('active');
     setTimeout(() => {
       if (!modal.classList.contains('active')) {
+        modal.classList.remove('is-open');
         modal.style.display = 'none';
+        document.body.classList.remove('modal-open');
       }
-    }, 300);
-    document.body.classList.remove('modal-open');
+    }, 240);
   }
 };
 
