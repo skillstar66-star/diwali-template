@@ -106,6 +106,12 @@ let users = JSON.parse(localStorage.getItem('saforio_users')) || [];
 let currentCategory = 'sarees';
 let currentSort = 'default';
 let currentUser = JSON.parse(localStorage.getItem('saforio_currentUser')) || null;
+// Immediately update UI when DOM is ready so there is 0 delay or flash of login links
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => { if (typeof updateUserUI === 'function') updateUserUI(); });
+} else {
+  setTimeout(() => { if (typeof updateUserUI === 'function') updateUserUI(); }, 0);
+}
 let modalHistory = [];
 let adminCurrentProductFilter = 'all';
 
@@ -621,6 +627,13 @@ const loginView = document.getElementById('loginView');
 const regView = document.getElementById('registerView');
 
 window.openAuth = (initialView = 'login') => {
+  if (currentUser) {
+    console.log("Customer is already logged in as:", currentUser.name || currentUser.email);
+    if (typeof window.toggleUserDropdown === 'function') {
+      window.toggleUserDropdown();
+    }
+    return;
+  }
   if (authModal) {
     if (typeof window.toggleAuth === 'function') {
       window.toggleAuth(initialView);
@@ -900,47 +913,39 @@ window.handleAuth = () => {
 // Firebase Auth State Observer
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
-    // User is signed in
-    if (db) {
-      db.collection("users").doc(user.uid).get().then((doc) => {
-        if (doc.exists) {
-          currentUser = doc.data();
-          currentUser.uid = user.uid;
-          localStorage.setItem('saforio_currentUser', JSON.stringify(currentUser));
-          updateUserUI();
-        } else {
-          currentUser = {
-            uid: user.uid,
-            email: user.email,
-            name: user.displayName || (user.email ? user.email.split('@')[0] : 'User')
-          };
-          localStorage.setItem('saforio_currentUser', JSON.stringify(currentUser));
-          updateUserUI();
-        }
-      }).catch((err) => {
-        console.warn("Could not fetch user doc:", err);
-        currentUser = {
-          uid: user.uid,
-          email: user.email,
-          name: user.displayName || (user.email ? user.email.split('@')[0] : 'User')
-        };
-        localStorage.setItem('saforio_currentUser', JSON.stringify(currentUser));
-        updateUserUI();
-      });
-    } else {
+    // User is signed in with Firebase
+    const updateUserData = (extraData = {}) => {
       currentUser = {
         uid: user.uid,
         email: user.email,
-        name: user.displayName || (user.email ? user.email.split('@')[0] : 'User')
+        name: extraData.name || user.displayName || (user.email ? user.email.split('@')[0] : 'User'),
+        phone: extraData.phone || user.phoneNumber || ''
       };
       localStorage.setItem('saforio_currentUser', JSON.stringify(currentUser));
       updateUserUI();
+    };
+
+    if (db) {
+      db.collection("users").doc(user.uid).get().then((doc) => {
+        if (doc.exists) {
+          updateUserData(doc.data());
+        } else {
+          updateUserData({});
+        }
+      }).catch((err) => {
+        console.warn("Could not fetch user doc:", err);
+        updateUserData({});
+      });
+    } else {
+      updateUserData({});
     }
   } else {
-    // User is signed out
-    currentUser = null;
-    localStorage.removeItem('saforio_currentUser');
-    updateUserUI();
+    // Only clear if localStorage has no active session (i.e. user explicitly clicked Sign Out)
+    const stored = localStorage.getItem('saforio_currentUser');
+    if (!stored) {
+      currentUser = null;
+      updateUserUI();
+    }
   }
 });
 
@@ -1027,10 +1032,26 @@ function updateUserUI() {
         </div>
       `;
     }
+
+    // Update Hero section button if present
+    const heroJoinBtn = document.querySelector('.hero-btns button[onclick*="openAuth"]');
+    if (heroJoinBtn) {
+      heroJoinBtn.innerText = 'MY ACCOUNT';
+      heroJoinBtn.onclick = (e) => {
+        if (e) e.stopPropagation();
+        window.toggleUserDropdown(e);
+      };
+    }
   } else {
     if (link) link.innerHTML = '<a href="javascript:void(0)" onclick="openAuth()" id="navLogin">Login / Register</a>';
     if (mobileLink) mobileLink.innerHTML = '<a href="javascript:void(0)" onclick="toggleMobileMenu(); openAuth()">Login / Register</a>';
     if (mobileNavCont) mobileNavCont.innerHTML = '';
+
+    const heroJoinBtn = document.querySelector('.hero-btns button.btn-outline');
+    if (heroJoinBtn && heroJoinBtn.innerText === 'MY ACCOUNT') {
+      heroJoinBtn.innerText = 'JOIN THE FAMILY';
+      heroJoinBtn.onclick = () => window.openAuth();
+    }
   }
 }
 
@@ -4474,9 +4495,9 @@ window.openAppointmentModal = () => {
     const nameInp = document.getElementById('appoName');
     const emailInp = document.getElementById('appoEmail');
     const phoneInp = document.getElementById('appoPhone');
-    if (nameInp && !nameInp.value) nameInp.value = currentUser.displayName || '';
+    if (nameInp && !nameInp.value) nameInp.value = currentUser.name || currentUser.displayName || '';
     if (emailInp && !emailInp.value) emailInp.value = currentUser.email || '';
-    if (phoneInp && !phoneInp.value && currentUser.phoneNumber) phoneInp.value = currentUser.phoneNumber;
+    if (phoneInp && !phoneInp.value) phoneInp.value = currentUser.phone || currentUser.phoneNumber || '';
   }
 
   // Set min date to today
