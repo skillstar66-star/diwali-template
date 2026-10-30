@@ -3797,7 +3797,36 @@ window.openBlouseBooking = () => {
   } else {
     window.open('https://forms.gle/xHJ6hSpyreHVNsNc8', '_blank');
   }
-}
+};
+
+window.closeBlouseBooking = () => {
+  const modal = document.getElementById('blouseModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+  }
+};
+
+window.submitBlouseBooking = () => {
+  const name = document.getElementById('blouseName') ? document.getElementById('blouseName').value.trim() : '';
+  const phone = document.getElementById('blousePhone') ? document.getElementById('blousePhone').value.trim() : '';
+  const notes = document.getElementById('blouseNotes') ? document.getElementById('blouseNotes').value.trim() : '';
+  if (!name || !phone) {
+    alert('Please enter your name and phone number.');
+    return;
+  }
+  if (window.db) {
+    db.collection("leads").add({
+      name,
+      phone,
+      interest: 'Custom Blouse Consultation',
+      notes,
+      date: new Date().toISOString()
+    }).catch(err => console.error("Firestore blouse lead error:", err));
+  }
+  alert('Thank you, ' + name + '! Your booking request for a custom blouse consultation has been received. Our team will contact you shortly.');
+  window.closeBlouseBooking();
+};
 
 // FAQ Accordion Toggle
 window.toggleFaq = (element) => {
