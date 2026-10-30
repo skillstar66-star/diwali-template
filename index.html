@@ -1834,102 +1834,59 @@
       }
     </script>
 
-  <!-- APPOINTMENT & CONTACT MODAL -->
+    <!-- APPOINTMENT & CONTACT MODAL (EXACT USER DESIGN) -->
   <div class="modal" id="appointmentModal">
     <div class="modal-content appointment-modal-content">
-      <span class="modal-close" onclick="closeAppointmentModal()">×</span>
-      <div class="appointment-modal-header">
-        <div class="auth-top-ornament">🪷</div>
-        <span class="section-label">ROKEA CONCIERGE & STYLING</span>
-        <h2 class="appointment-heading">Book an <em>Appointment</em></h2>
-        <p class="appointment-subtitle">Schedule a personalized bridal styling consultation, custom blouse fitting, or boutique visit in Coimbatore.</p>
-        <div class="auth-ornamental-divider small">
-          <span class="line"></span>
-          <span class="symbol">🪷</span>
-          <span class="line"></span>
+      <span class="modal-close" onclick="closeAppointmentModal()">&times;</span>
+      
+      <div class="appo-header-wrap">
+        <div class="appo-top-badge">
+          <span class="appo-sparkle">&#10024;</span> Priority Consultation
         </div>
+        <h2 class="appo-heading">Book an <em>Appointment</em></h2>
+        <p class="appo-subtitle">Connect with our master stylists for bespoke bridal sarees, jewellery &amp; custom blouse consultations.</p>
       </div>
 
-      <form id="appointmentForm" onsubmit="handleAppointmentSubmit(event)" class="appointment-form">
-        <div class="form-row">
-          <div class="form-group">
-            <label>YOUR NAME <span style="color:#d4af37;">*</span></label>
-            <div class="input-with-icon">
-              <i class="fas fa-user input-icon"></i>
-              <input type="text" id="appoName" required placeholder="Ex: Ananya Sharma">
-            </div>
+      <form id="appointmentForm" onsubmit="handleAppointmentSubmit(event)" class="appo-form">
+        <div class="appo-grid-row">
+          <div class="appo-form-group">
+            <label class="appo-label">Full Name <span class="appo-req">*</span></label>
+            <input type="text" id="appoName" class="appo-input" required placeholder="Ex: Priya Sundaram">
           </div>
-          <div class="form-group">
-            <label>PHONE / WHATSAPP <span style="color:#d4af37;">*</span></label>
-            <div class="input-with-icon">
-              <i class="fas fa-phone input-icon"></i>
-              <input type="tel" id="appoPhone" required placeholder="Ex: 9876543210">
-            </div>
+          <div class="appo-form-group">
+            <label class="appo-label">Phone / WhatsApp <span class="appo-req">*</span></label>
+            <input type="tel" id="appoPhone" class="appo-input" required placeholder="+91 98765 43210">
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>EMAIL ADDRESS</label>
-            <div class="input-with-icon">
-              <i class="fas fa-envelope input-icon"></i>
-              <input type="email" id="appoEmail" placeholder="your@email.com">
-            </div>
+        <div class="appo-grid-row">
+          <div class="appo-form-group">
+            <label class="appo-label">Email Address</label>
+            <input type="email" id="appoEmail" class="appo-input" placeholder="priya@example.com">
           </div>
-          <div class="form-group">
-            <label>SERVICE / INTEREST <span style="color:#d4af37;">*</span></label>
-            <div class="input-with-icon select-wrapper">
-              <i class="fas fa-sparkles input-icon"></i>
-              <select id="appoService" required>
-                <option value="Bridal Saree Consultation">Bridal Saree Styling & Draping</option>
-                <option value="Custom Blouse Designing">Custom Blouse Designing & Measurement</option>
-                <option value="Heritage Jewellery Styling">Heritage & Temple Jewellery Styling</option>
-                <option value="Boutique Personal Visit">Boutique Visit (Coimbatore)</option>
+          <div class="appo-form-group">
+            <label class="appo-label">Interested Service / Product <span class="appo-req">*</span></label>
+            <div class="appo-select-wrap">
+              <select id="appoService" class="appo-select" required>
+                <option value="Bridal Saree Consultation" selected>Bridal Saree Consultation</option>
+                <option value="Custom Blouse Designing">Custom Blouse Designing</option>
+                <option value="Heritage Jewellery Styling">Heritage Jewellery Styling</option>
+                <option value="Boutique Personal Visit">Boutique Personal Visit</option>
                 <option value="Online Video Consultation">Online Video Consultation</option>
-                <option value="General Enquiry">General Enquiry / Support</option>
+                <option value="General Enquiry">General Enquiry</option>
               </select>
             </div>
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>PREFERRED DATE</label>
-            <div class="input-with-icon">
-              <i class="fas fa-calendar-alt input-icon"></i>
-              <input type="date" id="appoDate">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>PREFERRED TIME</label>
-            <div class="input-with-icon select-wrapper">
-              <i class="fas fa-clock input-icon"></i>
-              <select id="appoTime">
-                <option value="Morning (10:00 AM - 1:00 PM)">Morning (10:00 AM - 1:00 PM)</option>
-                <option value="Afternoon (1:00 PM - 5:00 PM)" selected>Afternoon (1:00 PM - 5:00 PM)</option>
-                <option value="Evening (5:00 PM - 8:00 PM)">Evening (5:00 PM - 8:00 PM)</option>
-              </select>
-            </div>
-          </div>
+        <div class="appo-form-group">
+          <label class="appo-label">Your Requirements / Preferred Date &amp; Time</label>
+          <textarea id="appoNotes" class="appo-textarea" rows="3" placeholder="Tell us about your wedding date, design preferences, or appointment timing..."></textarea>
         </div>
 
-        <div class="form-group">
-          <label>MESSAGE / SPECIAL REQUIREMENTS</label>
-          <div class="input-with-icon">
-            <textarea id="appoNotes" rows="2" placeholder="Tell us about your occasion, preferred colors, or design requirements..." style="width:100%; border:1px solid rgba(212,175,55,0.3); border-radius:8px; padding:10px 12px; font-family:inherit; font-size:13px; outline:none; background:#fff; resize:vertical;"></textarea>
-          </div>
-        </div>
-
-        <button type="submit" class="btn-primary pill-btn" id="appoSubmitBtn" style="width:100%; margin-top:10px; padding:12px; font-weight:700; letter-spacing:1px; display:flex; align-items:center; justify-content:center; gap:8px;">
-          CONFIRM APPOINTMENT <i class="fas fa-arrow-right"></i>
+        <button type="submit" id="appoSubmitBtn" class="appo-submit-btn">
+          CONFIRM APPOINTMENT REQUEST <span class="appo-btn-arrow">&rarr;</span>
         </button>
-
-        <div class="appointment-whatsapp-box" style="margin-top:16px; padding:12px 14px; background:rgba(37,211,102,0.1); border:1px solid rgba(37,211,102,0.35); border-radius:10px; text-align:center;">
-          <span style="font-size:12px; color:#2e7d32; font-weight:600; display:block; margin-bottom:6px;">Prefer Instant Booking via WhatsApp?</span>
-          <a href="javascript:void(0)" onclick="bookViaWhatsAppDirect()" style="display:inline-flex; align-items:center; gap:8px; background:#25D366; color:#fff; font-weight:700; font-size:12.5px; padding:8px 20px; border-radius:50px; text-decoration:none; box-shadow:0 4px 12px rgba(37,211,102,0.3);">
-            <i class="fab fa-whatsapp" style="font-size:16px;"></i> Book Instantly on WhatsApp
-          </a>
-        </div>
       </form>
     </div>
   </div>
