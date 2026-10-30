@@ -661,7 +661,7 @@
                 <span id="cart-count" class="cart-count"
                     style="position: absolute; top: -5px; right: -10px; background: var(--gold); color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 50%;">0</span>
             </div>
-            <button class="nav-cta" onclick="openAppointmentModal()">Book Appointment</button>
+            <button class="nav-cta" onclick="openAppointmentModal(event)">Book Appointment</button>
         </div>
     </nav>
 
@@ -928,7 +928,7 @@
                     <li><a href="tel:+917010394051">+91 7010394051</a></li>
                     <li><a href="mailto:rokeabyrk@gmail.com">rokeabyrk@gmail.com</a></li>
                     <li style="margin-top: 15px;"><button class="btn-primary"
-                            style="padding: 8px 15px; font-size: 12px;" onclick="openAppointmentModal()">Book Appointment</button>
+                            style="padding: 8px 15px; font-size: 12px;" onclick="openAppointmentModal(event)">Book Appointment</button>
                     </li>
                 </ul>
             </div>
@@ -1215,8 +1215,8 @@
 
     <!-- APPOINTMENT & CONTACT MODAL (EXACT USER DESIGN) -->
   <div class="modal" id="appointmentModal">
-    <div class="appointment-modal-content">
-      <span class="modal-close" onclick="closeAppointmentModal()">&times;</span>
+    <div class="appointment-modal-content" onclick="event.stopPropagation()">
+      <span class="modal-close" onclick="closeAppointmentModal(event)">&times;</span>
       
       <div class="appo-header-wrap">
         <div class="appo-top-badge">

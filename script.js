@@ -4425,7 +4425,8 @@ if (document.readyState === 'interactive' || document.readyState === 'complete')
 // ========================================================
 // APPOINTMENT & CONTACT FORM HANDLERS
 // ========================================================
-window.openAppointmentModal = () => {
+window.openAppointmentModal = (e) => {
+  if (e && e.stopPropagation) e.stopPropagation();
   let modal = document.getElementById('appointmentModal');
   if (!modal) {
     // If not found in DOM, dynamically inject it so it works on any page
@@ -4433,8 +4434,8 @@ window.openAppointmentModal = () => {
     modalWrapper.id = 'appointmentModal';
     modalWrapper.className = 'modal';
     modalWrapper.innerHTML = `
-      <div class="appointment-modal-content">
-        <span class="modal-close" onclick="closeAppointmentModal()">&times;</span>
+      <div class="appointment-modal-content" onclick="event.stopPropagation()">
+        <span class="modal-close" onclick="closeAppointmentModal(event)">&times;</span>
         
         <div class="appo-header-wrap">
           <div class="appo-top-badge">
@@ -4512,27 +4513,23 @@ window.openAppointmentModal = () => {
   const card = modal.querySelector('.appointment-modal-content');
   if (card) card.scrollTop = 0;
 
-  modal.classList.add('is-open');
   modal.style.display = 'flex';
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => {
-      modal.classList.add('active');
-    });
-  });
+  void modal.offsetWidth; // Force synchronous layout reflow so display:flex is painted
+  modal.classList.add('active');
   document.body.classList.add('modal-open');
 };
 
-window.closeAppointmentModal = () => {
+window.closeAppointmentModal = (e) => {
+  if (e && e.stopPropagation) e.stopPropagation();
   const modal = document.getElementById('appointmentModal');
   if (modal) {
     modal.classList.remove('active');
     setTimeout(() => {
       if (!modal.classList.contains('active')) {
-        modal.classList.remove('is-open');
         modal.style.display = 'none';
         document.body.classList.remove('modal-open');
       }
-    }, 240);
+    }, 200);
   }
 };
 

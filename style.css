@@ -6869,49 +6869,43 @@ img {
   z-index: 99999 !important;
   position: fixed !important;
   inset: 0 !important;
-  background: rgba(14, 9, 4, 0.82) !important;
+  background: rgba(12, 7, 3, 0.82) !important;
   display: none;
   align-items: center !important;
   justify-content: center !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.22s ease-out;
+  transition: opacity 0.2s ease-in-out;
   padding: 16px !important;
   box-sizing: border-box !important;
 }
 
-#appointmentModal.is-open {
-  display: flex !important;
-}
-
 #appointmentModal.active {
+  display: flex !important;
   opacity: 1 !important;
-  pointer-events: auto !important;
 }
 
 #appointmentModal .appointment-modal-content {
   background: #FFFFFF !important;
   width: 92% !important;
-  max-width: 580px !important;
+  max-width: 560px !important;
   border-radius: 20px !important;
-  padding: 32px 30px 28px !important;
-  border: 1px solid rgba(212, 175, 55, 0.18) !important;
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.42) !important;
+  padding: 26px 28px 24px !important;
+  border: 1px solid rgba(212, 175, 55, 0.2) !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45) !important;
   position: relative !important;
-  max-height: 88vh !important;
+  max-height: 90vh !important;
   overflow-y: auto !important;
   box-sizing: border-box !important;
-  transform: scale(0.96) translateY(8px) !important;
+  transform: translateY(12px) !important;
   transform-origin: center center !important;
-  will-change: transform !important;
   -webkit-font-smoothing: antialiased !important;
-  transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
 #appointmentModal.active .appointment-modal-content {
-  transform: scale(1) translateY(0) !important;
+  transform: translateY(0) !important;
 }
 
 #appointmentModal .appointment-modal-content::-webkit-scrollbar {
@@ -6929,8 +6923,8 @@ img {
 
 #appointmentModal .modal-close {
   position: absolute !important;
-  top: 16px !important;
-  right: 20px !important;
+  top: 14px !important;
+  right: 18px !important;
   font-size: 26px !important;
   font-weight: 300 !important;
   color: #665a4a !important;
@@ -6951,7 +6945,7 @@ img {
 /* Header */
 .appo-header-wrap {
   text-align: center !important;
-  margin-bottom: 20px !important;
+  margin-bottom: 16px !important;
 }
 
 .appo-top-badge {
@@ -6962,12 +6956,12 @@ img {
   border: 1px solid #F3DEB2 !important;
   color: #9A6818 !important;
   font-family: 'Poppins', sans-serif !important;
-  font-size: 11.5px !important;
+  font-size: 11px !important;
   font-weight: 600 !important;
-  padding: 5px 16px !important;
+  padding: 4px 14px !important;
   border-radius: 50px !important;
-  margin-bottom: 12px !important;
-  box-shadow: 0 2px 6px rgba(243, 222, 178, 0.25) !important;
+  margin-bottom: 8px !important;
+  box-shadow: 0 2px 5px rgba(243, 222, 178, 0.25) !important;
 }
 
 .appo-sparkle {
@@ -6977,10 +6971,10 @@ img {
 
 .appo-heading {
   font-family: 'Playfair Display', serif !important;
-  font-size: 30px !important;
+  font-size: 26px !important;
   font-weight: 700 !important;
   color: #181109 !important;
-  margin: 0 0 8px 0 !important;
+  margin: 0 0 6px 0 !important;
   letter-spacing: -0.3px !important;
   text-align: center !important;
 }
@@ -6996,24 +6990,24 @@ img {
 
 .appo-subtitle {
   font-family: 'Poppins', sans-serif !important;
-  font-size: 12.5px !important;
+  font-size: 12px !important;
   color: #666666 !important;
-  line-height: 1.5 !important;
-  max-width: 460px !important;
-  margin: 0 auto 20px auto !important;
+  line-height: 1.45 !important;
+  max-width: 440px !important;
+  margin: 0 auto 14px auto !important;
   text-align: center !important;
 }
 
 /* Form Layout */
 .appo-form {
-  margin-top: 6px !important;
+  margin-top: 4px !important;
 }
 
 .appo-grid-row {
   display: grid !important;
   grid-template-columns: 1fr 1fr !important;
   gap: 14px !important;
-  margin-bottom: 14px !important;
+  margin-bottom: 12px !important;
 }
 
 .appo-grid-row .appo-form-group {
@@ -7021,17 +7015,17 @@ img {
 }
 
 .appo-form-group {
-  margin-bottom: 14px !important;
+  margin-bottom: 12px !important;
   text-align: left !important;
 }
 
 .appo-label {
   display: block !important;
   font-family: 'Poppins', sans-serif !important;
-  font-size: 12.5px !important;
+  font-size: 12px !important;
   font-weight: 600 !important;
   color: #1A1209 !important;
-  margin-bottom: 6px !important;
+  margin-bottom: 5px !important;
   text-align: left !important;
   letter-spacing: 0 !important;
   text-transform: none !important;
@@ -7050,19 +7044,19 @@ img {
   background: #FAF8F5 !important;
   border: 1.5px solid #E5DEC9 !important;
   border-radius: 10px !important;
-  padding: 12px 14px !important;
+  padding: 11px 14px !important;
   font-family: 'Poppins', sans-serif !important;
   font-size: 13px !important;
   color: #1A1209 !important;
   outline: none !important;
-  transition: all 0.22s ease !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
   box-sizing: border-box !important;
   box-shadow: none !important;
 }
 
 .appo-input,
 .appo-select {
-  height: 46px !important;
+  height: 44px !important;
 }
 
 .appo-input:focus,
@@ -7070,7 +7064,7 @@ img {
 .appo-textarea:focus {
   background: #FFFFFF !important;
   border-color: #C9A84C !important;
-  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.18) !important;
+  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.2) !important;
 }
 
 .appo-input::placeholder,
@@ -7109,20 +7103,20 @@ img {
 
 .appo-textarea {
   resize: vertical !important;
-  min-height: 80px !important;
-  line-height: 1.5 !important;
+  min-height: 72px !important;
+  line-height: 1.45 !important;
 }
 
 .appo-submit-btn {
   width: 100% !important;
-  height: 48px !important;
+  height: 46px !important;
   background: #181109 !important;
   color: #E2C26D !important;
   border: none !important;
   border-radius: 10px !important;
   padding: 0 20px !important;
   font-family: 'Poppins', sans-serif !important;
-  font-size: 12.5px !important;
+  font-size: 12px !important;
   font-weight: 700 !important;
   letter-spacing: 1.5px !important;
   text-transform: uppercase !important;
@@ -7131,16 +7125,16 @@ img {
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  margin-top: 18px !important;
-  transition: all 0.25s ease !important;
-  box-shadow: 0 4px 16px rgba(24, 17, 9, 0.25) !important;
+  margin-top: 14px !important;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease !important;
+  box-shadow: 0 4px 14px rgba(24, 17, 9, 0.25) !important;
 }
 
 .appo-submit-btn:hover {
   background: #000000 !important;
   color: #FFFFFF !important;
   transform: translateY(-1px) !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4) !important;
 }
 
 .appo-btn-arrow {
@@ -7155,20 +7149,20 @@ img {
 @media (max-width: 600px) {
   #appointmentModal .appointment-modal-content {
     width: 94% !important;
-    padding: 24px 18px 20px !important;
+    padding: 22px 16px 18px !important;
     border-radius: 16px !important;
   }
   .appo-grid-row {
     grid-template-columns: 1fr !important;
-    gap: 12px !important;
-    margin-bottom: 12px !important;
+    gap: 10px !important;
+    margin-bottom: 10px !important;
   }
   .appo-heading {
-    font-size: 24px !important;
+    font-size: 22px !important;
   }
   .appo-subtitle {
-    font-size: 12px !important;
-    margin-bottom: 16px !important;
+    font-size: 11.5px !important;
+    margin-bottom: 12px !important;
   }
 }
 

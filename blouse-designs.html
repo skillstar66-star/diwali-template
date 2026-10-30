@@ -171,7 +171,7 @@
       <li><a href="#contact">Contact</a></li>
     </ul>
     <div class="nav-actions">
-      <button class="nav-cta" onclick="openAppointmentModal()">Book Appointment</button>
+      <button class="nav-cta" onclick="openAppointmentModal(event)">Book Appointment</button>
     </div>
   </nav>
 
@@ -290,8 +290,8 @@
 
     <!-- APPOINTMENT & CONTACT MODAL (EXACT USER DESIGN) -->
   <div class="modal" id="appointmentModal">
-    <div class="appointment-modal-content">
-      <span class="modal-close" onclick="closeAppointmentModal()">&times;</span>
+    <div class="appointment-modal-content" onclick="event.stopPropagation()">
+      <span class="modal-close" onclick="closeAppointmentModal(event)">&times;</span>
       
       <div class="appo-header-wrap">
         <div class="appo-top-badge">
