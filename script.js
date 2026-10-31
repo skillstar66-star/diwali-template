@@ -2883,6 +2883,7 @@ window.resetStylist = () => {
   const loader = document.getElementById('aiAnalysis');
   const input = document.getElementById('userImageInput');
   if (zone) zone.style.display = 'block';
+  const sampleBtn = document.getElementById('sampleLookCont'); if (sampleBtn) sampleBtn.style.display = 'block';
   if (previewCont) previewCont.style.display = 'none';
   if (results) results.style.display = 'none';
   if (loader) loader.style.display = 'none';
@@ -2914,6 +2915,7 @@ window.handleUserImage = async (eventOrUrl) => {
 
     if (previewImg) previewImg.src = previewSrc;
     if (zone) zone.style.display = 'none';
+    const sampleBtn = document.getElementById('sampleLookCont'); if (sampleBtn) sampleBtn.style.display = 'none';
     if (previewCont) previewCont.style.display = 'block';
 
     if (loader) {

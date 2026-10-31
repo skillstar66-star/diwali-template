@@ -102,18 +102,22 @@
   </nav>
 
   <header class="ai-hero">
-    <div class="ai-hero-content">
-      <a href="index.html" class="btn-back">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-        Back to Home
-      </a>
-      <span class="section-label">Future of Fashion</span>
-      <h1 class="hero-title">Virtual <em>Stylist</em></h1>
-      <p class="hero-subtitle">Experience the next generation of luxury. Let our AI analyze your features and curate the
-        perfect look just for you.</p>
+    <div class="ai-hero-inner">
+      <div class="ai-hero-top">
+        <a href="index.html" class="btn-back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          <span>Back to Home</span>
+        </a>
+      </div>
+      <div class="ai-hero-content">
+        <span class="section-label">Future of Fashion</span>
+        <h1 class="hero-title">Virtual <em>Stylist</em></h1>
+        <p class="hero-subtitle">Experience the next generation of luxury. Let our AI analyze your features and curate the
+          perfect look just for you.</p>
+      </div>
     </div>
   </header>
 
@@ -136,8 +140,8 @@
             <span>Supported: JPG, PNG, WEBP</span>
           </div>
         </div>
-        <div style="text-align: center; margin-top: 15px;">
-          <button type="button" class="btn-outline" style="font-size: 12px; padding: 8px 22px; border-radius: 50px; cursor: pointer; border: 1px solid var(--gold); background: rgba(255,255,255,0.85); font-weight: 600;" onclick="trySampleLook()">
+        <div id="sampleLookCont" style="text-align: center; margin-top: 18px;">
+          <button type="button" class="btn-sample-look" onclick="trySampleLook()">
             ✨ Try With Sample Photo
           </button>
         </div>
