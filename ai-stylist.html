@@ -58,9 +58,276 @@
   <link rel="apple-touch-icon" sizes="180x180" href="https://rokeabyrk.com/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-title" content="ROKEA">
   <link rel="manifest" href="https://rokeabyrk.com/site.webmanifest">
+
+  <style>
+    /* Lock Page Body */
+    body.ai-page {
+      overflow: hidden !important;
+      height: 100vh !important;
+    }
+
+    /* Maintenance Overlay */
+    .maintenance-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(14, 8, 4, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      z-index: 999999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      box-sizing: border-box;
+      animation: maintFadeIn 0.4s ease-out forwards;
+    }
+
+    @keyframes maintFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes maintPopIn {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .maintenance-card {
+      background: linear-gradient(155deg, #1e130a 0%, #120a04 100%);
+      border: 1.5px solid rgba(212, 175, 55, 0.45);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75), 0 0 40px rgba(201, 168, 76, 0.2);
+      border-radius: 20px;
+      padding: 44px 34px 38px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+      animation: maintPopIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      color: #faf6ef;
+      box-sizing: border-box;
+    }
+
+    .maintenance-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(201, 168, 76, 0.12);
+      border: 1px solid rgba(201, 168, 76, 0.35);
+      color: #e5c368;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 50px;
+      margin-bottom: 22px;
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: #e5c368;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #e5c368;
+      animation: pulseAnim 1.8s infinite;
+    }
+
+    @keyframes pulseAnim {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.75); }
+    }
+
+    .maintenance-icon-wrap {
+      margin: 0 auto 20px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201, 168, 76, 0.2) 0%, rgba(20, 12, 6, 0) 70%);
+      border: 2px solid rgba(201, 168, 76, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .maintenance-icon-wrap i {
+      font-size: 32px;
+      color: #ffd700;
+      filter: drop-shadow(0 2px 8px rgba(255, 215, 0, 0.4));
+    }
+
+    .maint-section-label {
+      font-size: 11px;
+      letter-spacing: 3px;
+      color: #c9a84c;
+      text-transform: uppercase;
+      font-weight: 600;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .maintenance-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 30px;
+      line-height: 1.25;
+      margin: 0 0 14px 0;
+      color: #ffffff;
+      font-weight: 600;
+    }
+
+    .maintenance-title em {
+      font-style: italic;
+      color: #d4af37;
+      font-weight: 400;
+    }
+
+    .maintenance-divider {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      margin: 12px auto 18px;
+      max-width: 200px;
+    }
+
+    .maintenance-divider .m-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(201, 168, 76, 0.5), transparent);
+    }
+
+    .maintenance-divider .m-symbol {
+      color: #d4af37;
+      font-size: 12px;
+    }
+
+    .maintenance-desc {
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #dfd7cc;
+      margin: 0 0 8px 0;
+    }
+
+    .maintenance-subdesc {
+      font-family: 'Poppins', sans-serif;
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: #a89f91;
+      margin: 0 0 28px 0;
+    }
+
+    .maintenance-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    @media (min-width: 480px) {
+      .maintenance-actions {
+        flex-direction: row;
+        justify-content: center;
+      }
+    }
+
+    .maint-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
+      color: #120a04 !important;
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 13px 24px;
+      border-radius: 50px;
+      text-decoration: none;
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.35);
+      transition: all 0.25s ease;
+    }
+
+    .maint-btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(212, 175, 55, 0.5);
+      background: linear-gradient(135deg, #ffd700 0%, #c59b27 100%);
+    }
+
+    .maint-btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      color: #e5c368 !important;
+      border: 1.5px solid rgba(201, 168, 76, 0.5);
+      font-family: 'Poppins', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 13px 22px;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .maint-btn-secondary:hover {
+      background: rgba(201, 168, 76, 0.12);
+      border-color: #ffd700;
+      color: #ffffff !important;
+      transform: translateY(-2px);
+    }
+  </style>
 </head>
 
 <body class="ai-page">
+
+  <!-- FEATURE UNDER MAINTENANCE LOCK OVERLAY -->
+  <div id="maintenanceModal" class="maintenance-overlay">
+    <div class="maintenance-card" role="dialog" aria-modal="true" aria-labelledby="maintTitle">
+      <div class="maintenance-badge">
+        <span class="pulse-dot"></span> System Upgrade
+      </div>
+      <div class="maintenance-icon-wrap">
+        <i class="fas fa-tools"></i>
+      </div>
+      <span class="maint-section-label">ROKEA BY RK</span>
+      <h2 class="maintenance-title" id="maintTitle">Feature Under <em>Maintenance</em></h2>
+      <div class="maintenance-divider">
+        <span class="m-line"></span>
+        <span class="m-symbol">✦</span>
+        <span class="m-line"></span>
+      </div>
+      <p class="maintenance-desc">
+        Our <strong>AI Virtual Stylist</strong> is currently undergoing scheduled maintenance & system upgrades to bring you an elevated luxury styling experience.
+      </p>
+      <p class="maintenance-subdesc">
+        This feature is temporarily unavailable. We apologize for the inconvenience and appreciate your patience!
+      </p>
+      <div class="maintenance-actions">
+        <a href="index.html" class="maint-btn-primary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to Home
+        </a>
+        <a href="collections.html" class="maint-btn-secondary">
+          Explore Products &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
 
   <!-- NAV -->
   <nav>

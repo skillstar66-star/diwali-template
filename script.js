@@ -1538,7 +1538,7 @@ function renderGrid() {
         <div class="product-price" style="display: block !important; margin-bottom: 8px;">
           <span class="price-main" style="color: var(--gold-dark); font-weight: 700; font-size: 18px;">₹${(extractPriceFromDesc(p.description) || p.price || 0).toLocaleString('en-IN')}</span>
         </div>
-        <div class="product-type" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">${p.category.toUpperCase()}</div>
+        <div class="product-type" style="font-size: 10px; color: var(--muted); text-transform: uppercase;">${(p.category === 'imitation' ? 'JEWELLERY' : (p.category || 'SAREES')).toUpperCase()}</div>
         <h3 class="product-name" style="margin: 5px 0 15px 0;">${p.name}</h3>
         ${isOOS
         ? `<button class="btn-oos" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:auto;width:100%;padding:12px 16px;border:1.5px solid #b0937a;background:linear-gradient(135deg,#f5ede6,#efe4d8);color:#7a4a2a;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border-radius:4px;cursor:not-allowed;font-family:'Poppins',sans-serif;" disabled>
@@ -3155,8 +3155,17 @@ function escapeHtmlCare(str) {
     .replace(/"/g, '&quot;');
 }
 
+function isJewelleryProduct(p) {
+  if (!p) return false;
+  const cat = (p.category || '').toLowerCase();
+  if (cat.includes('jewel') || cat === 'imitation' || cat.includes('jewellery') || cat.includes('jewelry')) return true;
+  const name = (p.name || '').toLowerCase();
+  return /necklace|haaram|haram|bangle|earring|choker|tikka|jewel|jhumka|hip chain|pendant|bangles|earrings|oddiyanam|vanki|maang tikka|nethichutti/i.test(name);
+}
+
 function getCareSummary(careText, category) {
-  if (!careText) return 'Dry Wash Only';
+  const isJewel = category && (category.toLowerCase() === 'imitation' || category.toLowerCase().includes('jewel'));
+  if (!careText) return isJewel ? 'Wipe Gently with Soft Cloth' : 'Dry Wash Only';
   const lines = String(careText).split(/\r?\n/).map(l => l.trim()).filter(Boolean);
   const washRegex = /(wash|clean|dry\s*clean|wipe)/i;
 
@@ -3275,20 +3284,23 @@ function generateProductDetailsGridHtml(p) {
       `;
     }
   } else {
-    // Saree or legacy fallback
+    // Saree or Jewellery fallback
+    const isJewel = isJewelleryProduct(p);
     let color = p.color || "";
     if (!color) {
       const colMatch = ((p.description || '') + '\n' + (p.productCare || '')).match(/(?:colou?r)\s*:\s*([^\r\n,;]+)/i);
-      color = colMatch ? colMatch[1].trim() : "As shown";
+      color = colMatch ? colMatch[1].trim() : (isJewel ? "Antique Gold Tone" : "As shown");
     }
 
     let occasion = p.occasion || "";
     if (!occasion) {
       const occMatch = ((p.description || '') + '\n' + (p.productCare || '')).match(/occasion\s*:\s*([^\r\n;]+)/i);
-      occasion = occMatch ? occMatch[1].trim() : "Wedding, Festival & Traditional Wear";
+      occasion = occMatch ? occMatch[1].trim() : (isJewel ? "Weddings, Festivals & Celebrations" : "Wedding, Festival & Traditional Wear");
     }
 
-    let type = p.productType || p.category || "Soft Silk Saree";
+    let type = p.productType || (isJewel ? (p.category === 'imitation' ? 'Heritage Temple Jewellery' : p.category) : (p.category || "Soft Silk Saree"));
+    let style = p.style || (isJewel ? "Traditional Temple / Antique" : "Traditional Indian");
+    let idealFor = p.idealFor || (isJewel ? "Women & Brides" : "Women");
 
     gridItemsHtml = `
       <div class="detail-item">
@@ -3299,7 +3311,7 @@ function generateProductDetailsGridHtml(p) {
       <div class="detail-item">
           <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path></svg></div>
           <div class="detail-label">Style</div>
-          <div class="detail-value">: ${p.style || "Traditional Indian"}</div>
+          <div class="detail-value">: ${style}</div>
       </div>
       <div class="detail-item">
           <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4"></path></svg></div>
@@ -3309,7 +3321,7 @@ function generateProductDetailsGridHtml(p) {
       <div class="detail-item">
           <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
           <div class="detail-label">Ideal For</div>
-          <div class="detail-value">: ${p.idealFor || "Women"}</div>
+          <div class="detail-value">: ${idealFor}</div>
       </div>
       <div class="detail-item">
           <div class="detail-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
@@ -3410,7 +3422,7 @@ function getCareIconSvg(title, descText) {
 }
 
 function generateProductCareData(p) {
-  const isJewellery = (p && ((p.category && p.category.toLowerCase().includes('jewel')) || (p.name && /necklace|haaram|bangle|earring|choker|tikka|jewel/i.test(p.name))));
+  const isJewellery = isJewelleryProduct(p);
   let rawText = (p && p.productCare) ? String(p.productCare).trim() : '';
 
   if (!rawText) {
@@ -3507,13 +3519,15 @@ function _populateProductPage(p) {
   }
 
   // ── SEO: Update page title, meta tags, OG tags, schema ──────────────────
+  const isJewellery = isJewelleryProduct(p);
+  const displayCat = isJewellery ? 'Heritage Jewellery' : (p.category === 'sarees' ? 'Luxury Saree' : (p.category || 'Luxury Saree'));
   const productPrice = extractPriceFromDesc(p.description) || p.price || 0;
   const productImg = p.image || p.img || '';
   const productDesc = (p.description || '').split('\n')[0].replace(/^[✦•\-\*]\s*/, '').trim()
-    || 'Luxury handwoven saree from ROKEA by RK, Coimbatore.';
+    || (isJewellery ? 'Handcrafted heritage temple jewellery from ROKEA by RK, Coimbatore.' : 'Luxury handwoven saree from ROKEA by RK, Coimbatore.');
 
   // Page title
-  document.title = `${p.name} | ${p.category || 'Luxury Saree'} — ROKEA by RK`;
+  document.title = `${p.name} | ${displayCat} — ROKEA by RK`;
 
   // Meta description
   let metaDesc = document.querySelector('meta[name="description"]');
@@ -3562,7 +3576,95 @@ function _populateProductPage(p) {
   const breadName = document.getElementById('breadcrumb-name');
   const shopBannerText = document.getElementById('shopBannerText');
   if (shopBannerText) {
-      shopBannerText.innerHTML = `Shop this elegant <strong>${p.name || 'product'}</strong> from ROKEA BY RK in Coimbatore and discover timeless sarees curated for every special occasion.`;
+    if (isJewellery) {
+      shopBannerText.innerHTML = `Shop this exquisite <strong>${p.name || 'jewellery'}</strong> from <strong>ROKEA BY RK</strong> in Coimbatore and discover handcrafted heritage temple jewellery &amp; antique ornaments curated for every special occasion.`;
+    } else {
+      shopBannerText.innerHTML = `Shop this elegant <strong>${p.name || 'product'}</strong> from <strong>ROKEA BY RK</strong> in Coimbatore and discover timeless sarees curated for every special occasion.`;
+    }
+  }
+
+  // Update Trust Badges for Jewellery vs Saree
+  const trustBadgesEl = document.getElementById('productTrustBadges');
+  if (trustBadgesEl) {
+    if (isJewellery) {
+      trustBadgesEl.innerHTML = `
+        <div class="trust-badge">
+            <div class="trust-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <polygon points="6 3 18 3 22 9 12 22 2 9"></polygon>
+                </svg>
+            </div>
+            <div class="trust-text">PREMIUM FINISH<br>&amp; STONES</div>
+        </div>
+        <div class="trust-badge">
+            <div class="trust-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+                </svg>
+            </div>
+            <div class="trust-text">TRADITIONAL<br>ELEGANCE</div>
+        </div>
+        <div class="trust-badge">
+            <div class="trust-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                </svg>
+            </div>
+            <div class="trust-text">SKIN FRIENDLY<br>&amp; SAFE</div>
+        </div>
+        <div class="trust-badge">
+            <div class="trust-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+            </div>
+            <div class="trust-text">SECURE LUXURY<br>PACKAGING</div>
+        </div>
+      `;
+    } else {
+      trustBadgesEl.innerHTML = `
+        <div class="trust-badge">
+            <div class="trust-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <circle cx="12" cy="8" r="6"></circle>
+                    <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path>
+                </svg>
+            </div>
+            <div class="trust-text">PREMIUM QUALITY<br>SILK</div>
+        </div>
+        <div class="trust-badge">
+            <div class="trust-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                    <path d="M3 9h18M9 21V9"></path>
+                </svg>
+            </div>
+            <div class="trust-text">TRADITIONAL<br>WEAVING</div>
+        </div>
+        <div class="trust-badge">
+            <div class="trust-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    <path d="m9 12 2 2 4-4"></path>
+                </svg>
+            </div>
+            <div class="trust-text">TRUSTED<br>AUTHENTICITY</div>
+        </div>
+        <div class="trust-badge">
+            <div class="trust-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+            </div>
+            <div class="trust-text">SECURE<br>PACKAGING</div>
+        </div>
+      `;
+    }
   }
 
   if (!name) return; // Not on product page
@@ -3579,8 +3681,8 @@ function _populateProductPage(p) {
 
     // SEO: descriptive alt text with product name, category, brand
     const altText = p.name
-      ? `${p.name} - ${p.category || 'Luxury Saree'} | ROKEA by RK`
-      : 'Luxury Handwoven Saree | ROKEA by RK';
+      ? `${p.name} - ${displayCat} | ROKEA by RK`
+      : `${displayCat} | ROKEA by RK`;
     mainImg.alt = altText;
     mainImg.setAttribute('fetchpriority', 'high'); // LCP image — load first
     mainImg.setAttribute('decoding', 'async');
@@ -3602,7 +3704,7 @@ function _populateProductPage(p) {
   if (name) name.innerText = p.name;
   if (breadName) breadName.innerText = p.name;
   if (breadCat) {
-    breadCat.innerText = p.category;
+    breadCat.innerText = isJewellery ? 'Jewellery' : (p.category || 'Collections');
     breadCat.href = `/collections`;
     breadCat.onclick = () => { localStorage.setItem('rokea_selected_category', p.category); };
   }
